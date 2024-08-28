@@ -1,8 +1,6 @@
-Starlette offers a simple but powerful interface for handling authentication
-and permissions. Once you've installed `AuthenticationMiddleware` with an
-appropriate authentication backend the `request.user` and `request.auth`
-interfaces will be available in your endpoints.
-
+Starlette는 인증과 권한을 처리하기 위한 간단하지만 강력한 인터페이스를 제공합니다.
+적절한 인증 백엔드와 함께 `AuthenticationMiddleware`를 설치하면 엔드포인트에서
+`request.user`와 `request.auth` 인터페이스를 사용할 수 있습니다.
 
 ```python
 from starlette.applications import Starlette
@@ -29,17 +27,17 @@ class BasicAuthBackend(AuthenticationBackend):
                 return
             decoded = base64.b64decode(credentials).decode("ascii")
         except (ValueError, UnicodeDecodeError, binascii.Error) as exc:
-            raise AuthenticationError('Invalid basic auth credentials')
+            raise AuthenticationError('유효하지 않은 기본 인증 자격 증명')
 
         username, _, password = decoded.partition(":")
-        # TODO: You'd want to verify the username and password here.
+        # TODO: 여기서 사용자 이름과 비밀번호를 확인해야 합니다.
         return AuthCredentials(["authenticated"]), SimpleUser(username)
 
 
 async def homepage(request):
     if request.user.is_authenticated:
-        return PlainTextResponse('Hello, ' + request.user.display_name)
-    return PlainTextResponse('Hello, you')
+        return PlainTextResponse('안녕하세요, ' + request.user.display_name)
+    return PlainTextResponse('안녕하세요')
 
 routes = [
     Route("/", endpoint=homepage)
@@ -52,35 +50,32 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-## Users
+## 사용자
 
-Once `AuthenticationMiddleware` is installed the `request.user` interface
-will be available to endpoints or other middleware.
+`AuthenticationMiddleware`가 설치되면 엔드포인트나 다른 미들웨어에서 `request.user` 인터페이스를
+사용할 수 있습니다.
 
-This interface should subclass `BaseUser`, which provides two properties,
-as well as whatever other information your user model includes.
+이 인터페이스는 `BaseUser`를 상속해야 하며, 다음 두 가지 속성과 함께 사용자 모델에 포함된
+다른 정보를 제공합니다.
 
 * `.is_authenticated`
 * `.display_name`
 
-Starlette provides two built-in user implementations: `UnauthenticatedUser()`,
-and `SimpleUser(username)`.
+Starlette는 두 가지 내장 사용자 구현을 제공합니다: `UnauthenticatedUser()`와
+`SimpleUser(username)`.
 
 ## AuthCredentials
 
-It is important that authentication credentials are treated as separate concept
-from users. An authentication scheme should be able to restrict or grant
-particular privileges independently of the user identity.
+인증 자격 증명을 사용자와 별개의 개념으로 취급하는 것이 중요합니다. 인증 스키마는
+사용자 신원과 독립적으로 특정 권한을 제한하거나 부여할 수 있어야 합니다.
 
-The `AuthCredentials` class provides the basic interface that `request.auth`
-exposes:
+`AuthCredentials` 클래스는 `request.auth`가 노출하는 기본 인터페이스를 제공합니다:
 
 * `.scopes`
 
-## Permissions
+## 권한
 
-Permissions are implemented as an endpoint decorator, that enforces that the
-incoming request includes the required authentication scopes.
+권한은 들어오는 요청이 필요한 인증 범위를 포함하도록 강제하는 엔드포인트 데코레이터로 구현됩니다.
 
 ```python
 from starlette.authentication import requires
@@ -91,7 +86,7 @@ async def dashboard(request):
     ...
 ```
 
-You can include either one or multiple required scopes:
+하나 또는 여러 개의 필요한 범위를 포함할 수 있습니다:
 
 ```python
 from starlette.authentication import requires
@@ -102,9 +97,8 @@ async def dashboard(request):
     ...
 ```
 
-By default 403 responses will be returned when permissions are not granted.
-In some cases you might want to customize this, for example to hide information
-about the URL layout from unauthenticated users.
+기본적으로 권한이 부여되지 않았을 때 403 응답이 반환됩니다.
+경우에 따라 이를 커스터마이즈하고 싶을 수 있습니다. 예를 들어, 인증되지 않은 사용자로부터 URL 레이아웃 정보를 숨기고 싶을 수 있습니다.
 
 ```python
 from starlette.authentication import requires
@@ -116,11 +110,9 @@ async def dashboard(request):
 ```
 
 !!! note
-    The `status_code` parameter is not supported with WebSockets. The 403 (Forbidden)
-    status code will always be used for those.
+    `status_code` 매개변수는 WebSocket에서는 지원되지 않습니다. WebSocket의 경우 항상 403 (Forbidden) 상태 코드가 사용됩니다.
 
-Alternatively you might want to redirect unauthenticated users to a different
-page.
+또는 인증되지 않은 사용자를 다른 페이지로 리다이렉트하고 싶을 수 있습니다.
 
 ```python
 from starlette.authentication import requires
@@ -135,7 +127,7 @@ async def dashboard(request):
     ...
 ```
 
-When redirecting users, the page you redirect them to will include URL they originally requested at the `next` query param:
+사용자를 리다이렉트할 때, 리다이렉트되는 페이지는 원래 요청한 URL을 `next` 쿼리 파라미터에 포함합니다:
 
 ```python
 from starlette.authentication import requires
@@ -149,8 +141,8 @@ async def admin(request):
 
 async def login(request):
     if request.method == "POST":
-        # Now that the user is authenticated,
-        # we can send them to their original request destination
+        # 사용자가 인증되면
+        # 원래 요청한 목적지로 보낼 수 있습니다
         if request.user.is_authenticated:
             next_url = request.query_params.get("next")
             if next_url:
@@ -158,8 +150,7 @@ async def login(request):
             return RedirectResponse("/")
 ```
 
-For class-based endpoints, you should wrap the decorator
-around a method on the class.
+클래스 기반 엔드포인트의 경우, 클래스의 메서드에 데코레이터를 감싸야 합니다.
 
 ```python
 from starlette.authentication import requires
@@ -172,10 +163,9 @@ class Dashboard(HTTPEndpoint):
         ...
 ```
 
-## Custom authentication error responses
+## 사용자 정의 인증 오류 응답
 
-You can customise the error response sent when a `AuthenticationError` is
-raised by an auth backend:
+인증 백엔드에서 `AuthenticationError`가 발생했을 때 보내는 오류 응답을 사용자 정의할 수 있습니다:
 
 ```python
 from starlette.applications import Starlette

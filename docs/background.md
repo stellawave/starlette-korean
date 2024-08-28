@@ -1,14 +1,12 @@
+Starlette는 프로세스 내 백그라운드 작업을 위한 `BackgroundTask` 클래스를 포함합니다.
 
-Starlette includes a `BackgroundTask` class for in-process background tasks.
+백그라운드 작업은 응답에 첨부되어야 하며, 응답이 전송된 후에만 실행됩니다.
 
-A background task should be attached to a response, and will run only once
-the response has been sent.
+### BackgroundTask
 
-### Background Task
+응답에 단일 백그라운드 작업을 추가하는 데 사용됩니다.
 
-Used to add a single background task to a response.
-
-Signature: `BackgroundTask(func, *args, **kwargs)`
+서명: `BackgroundTask(func, *args, **kwargs)`
 
 ```python
 from starlette.applications import Starlette
@@ -24,7 +22,7 @@ async def signup(request):
     username = data['username']
     email = data['email']
     task = BackgroundTask(send_welcome_email, to_address=email)
-    message = {'status': 'Signup successful'}
+    message = {'status': '가입 성공'}
     return JSONResponse(message, background=task)
 
 async def send_welcome_email(to_address):
@@ -41,9 +39,9 @@ app = Starlette(routes=routes)
 
 ### BackgroundTasks
 
-Used to add multiple background tasks to a response.
+응답에 여러 백그라운드 작업을 추가하는 데 사용됩니다.
 
-Signature: `BackgroundTasks(tasks=[])`
+서명: `BackgroundTasks(tasks=[])`
 
 ```python
 from starlette.applications import Starlette
@@ -57,7 +55,7 @@ async def signup(request):
     tasks = BackgroundTasks()
     tasks.add_task(send_welcome_email, to_address=email)
     tasks.add_task(send_admin_notification, username=username)
-    message = {'status': 'Signup successful'}
+    message = {'status': '가입 성공'}
     return JSONResponse(message, background=tasks)
 
 async def send_welcome_email(to_address):
@@ -74,5 +72,5 @@ app = Starlette(routes=routes)
 ```
 
 !!! important
-    The tasks are executed in order. In case one of the tasks raises
-    an exception, the following tasks will not get the opportunity to be executed.
+    작업은 순서대로 실행됩니다. 작업 중 하나가 예외를 발생시키면,
+    이후의 작업들은 실행될 기회를 얻지 못합니다.

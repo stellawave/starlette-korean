@@ -1,6 +1,6 @@
-site_name: Starlette
-site_description: The little ASGI library that shines.
-site_url: https://www.starlette.io
+site_name: Starlette Korean
+site_description: 빛나는 작은 ASGI 프레임워크.
+site_url: https://starlette.pinstella.com
 
 theme:
   name: 'material'
@@ -27,28 +27,28 @@ repo_url: https://github.com/encode/starlette
 edit_uri: edit/master/docs/
 
 nav:
-  - Introduction: 'index.md'
+  - 소개: 'index.md'
   - Applications: 'applications.md'
-  - Requests: 'requests.md'
-  - Responses: 'responses.md'
+  - 요청: 'requests.md'
+  - 응답: 'responses.md'
   - WebSockets: 'websockets.md'
-  - Routing: 'routing.md'
+  - 라우팅: 'routing.md'
   - Endpoints: 'endpoints.md'
   - Middleware: 'middleware.md'
-  - Static Files: 'staticfiles.md'
-  - Templates: 'templates.md'
+  - 정적 파일: 'staticfiles.md'
+  - 템플릿: 'templates.md'
   - Database: 'database.md'
   - GraphQL: 'graphql.md'
-  - Authentication: 'authentication.md'
+  - 인증: 'authentication.md'
   - API Schemas: 'schemas.md'
-  - Lifespan: 'lifespan.md'
+  - 수명: 'lifespan.md'
   - Background Tasks: 'background.md'
   - Server Push: 'server-push.md'
-  - Exceptions: 'exceptions.md'
-  - Configuration: 'config.md'
+  - 예외: 'exceptions.md'
+  - 구성: 'config.md'
   - Test Client: 'testclient.md'
   - Third Party Packages: 'third-party-packages.md'
-  - Contributing: 'contributing.md'
+  - 기여하기: 'contributing.md'
   - Release Notes: 'release-notes.md'
 
 markdown_extensions:

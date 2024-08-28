@@ -17,41 +17,40 @@
 
 # Starlette
 
-Starlette is a lightweight [ASGI][asgi] framework/toolkit,
-which is ideal for building async web services in Python.
+Starlette는 가벼운 [ASGI][asgi] 프레임워크/툴킷으로, Python에서 비동기 웹 서비스를 구축하는 데 이상적입니다.
 
-It is production-ready, and gives you the following:
+프로덕션 환경에서 사용할 준비가 되어 있으며, 다음과 같은 기능을 제공합니다:
 
-* A lightweight, low-complexity HTTP web framework.
-* WebSocket support.
-* In-process background tasks.
-* Startup and shutdown events.
-* Test client built on `httpx`.
-* CORS, GZip, Static Files, Streaming responses.
-* Session and Cookie support.
-* 100% test coverage.
-* 100% type annotated codebase.
-* Few hard dependencies.
-* Compatible with `asyncio` and `trio` backends.
-* Great overall performance [against independent benchmarks][techempower].
+* 가볍고 복잡도가 낮은 HTTP 웹 프레임워크
+* WebSocket 지원
+* 프로세스 내 백그라운드 작업
+* 시작 및 종료 이벤트
+* `httpx`를 기반으로 한 테스트 클라이언트
+* CORS, GZip, 정적 파일, 스트리밍 응답
+* 세션 및 쿠키 지원
+* 100% 테스트 커버리지
+* 100% 타입 어노테이션이 된 코드베이스
+* 적은 수의 핵심 의존성
+* `asyncio` 및 `trio` 백엔드와 호환
+* [독립적인 벤치마크][techempower]에 대해 전반적으로 우수한 성능
 
-## Requirements
+## 요구사항
 
 Python 3.8+
 
-## Installation
+## 설치
 
 ```shell
 $ pip3 install starlette
 ```
 
-You'll also want to install an ASGI server, such as [uvicorn](https://www.uvicorn.org/), [daphne](https://github.com/django/daphne/), or [hypercorn](https://hypercorn.readthedocs.io/en/latest/).
+또한 [uvicorn](https://www.uvicorn.org/), [daphne](https://github.com/django/daphne/), 또는 [hypercorn](https://hypercorn.readthedocs.io/en/latest/)과 같은 ASGI 서버를 설치해야 합니다.
 
 ```shell
 $ pip3 install uvicorn
 ```
 
-## Example
+## 예제
 
 **example.py**:
 
@@ -71,30 +70,29 @@ routes = [
 app = Starlette(debug=True, routes=routes)
 ```
 
-Then run the application using Uvicorn:
+그런 다음 Uvicorn을 사용하여 애플리케이션을 실행합니다:
 
 ```shell
 $ uvicorn example:app
 ```
 
-For a more complete example, see [encode/starlette-example](https://github.com/encode/starlette-example).
+더 완전한 예제는 [encode/starlette-example](https://github.com/encode/starlette-example)을 참조하세요.
 
-## Dependencies
+## 의존성
 
-Starlette only requires `anyio`, and the following are optional:
+Starlette는 `anyio`만 필요하며, 다음은 선택사항입니다:
 
-* [`httpx`][httpx] - Required if you want to use the `TestClient`.
-* [`jinja2`][jinja2] - Required if you want to use `Jinja2Templates`.
-* [`python-multipart`][python-multipart] - Required if you want to support form parsing, with `request.form()`.
-* [`itsdangerous`][itsdangerous] - Required for `SessionMiddleware` support.
-* [`pyyaml`][pyyaml] - Required for `SchemaGenerator` support.
+* [`httpx`][httpx] - `TestClient`를 사용하려면 필요합니다.
+* [`jinja2`][jinja2] - `Jinja2Templates`를 사용하려면 필요합니다.
+* [`python-multipart`][python-multipart] - `request.form()`으로 폼 파싱을 지원하려면 필요합니다.
+* [`itsdangerous`][itsdangerous] - `SessionMiddleware` 지원에 필요합니다.
+* [`pyyaml`][pyyaml] - `SchemaGenerator` 지원에 필요합니다.
 
-You can install all of these with `pip3 install starlette[full]`.
+`pip3 install starlette[full]`로 이 모든 것을 설치할 수 있습니다.
 
-## Framework or Toolkit
+## 프레임워크 또는 툴킷
 
-Starlette is designed to be used either as a complete framework, or as
-an ASGI toolkit. You can use any of its components independently.
+Starlette는 완전한 프레임워크로 사용되거나 ASGI 툴킷으로 사용되도록 설계되었습니다. 모든 구성 요소를 독립적으로 사용할 수 있습니다.
 
 ```python
 from starlette.responses import PlainTextResponse
@@ -106,7 +104,7 @@ async def app(scope, receive, send):
     await response(scope, receive, send)
 ```
 
-Run the `app` application in `example.py`:
+`example.py`의 `app` 애플리케이션을 실행합니다:
 
 ```shell
 $ uvicorn example:app
@@ -114,20 +112,24 @@ INFO: Started server process [11509]
 INFO: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-Run uvicorn with `--reload` to enable auto-reloading on code changes.
+코드 변경 시 자동 재로딩을 활성화하려면 `--reload`와 함께 uvicorn을 실행하세요.
 
-## Modularity
+## 모듈성
 
-The modularity that Starlette is designed on promotes building re-usable
-components that can be shared between any ASGI framework. This should enable
-an ecosystem of shared middleware and mountable applications.
+Starlette가 설계된 모듈성은 모든 ASGI 프레임워크 간에 공유할 수 있는 재사용 가능한 구성 요소를 구축하도록 촉진합니다. 이를 통해 공유 미들웨어와 마운트 가능한 애플리케이션의 생태계를 구축할 수 있습니다.
 
-The clean API separation also means it's easier to understand each component
-in isolation.
+깔끔한 API 분리는 각 구성 요소를 개별적으로 이해하기 쉽게 만듭니다.
+
+# 한국어 번역
+
+**이 페이지의 번역 과정은 90% 이상 AI가 진행하였습니다.**
+자세한 내용은 [블로그](https://jason-in-cosmos.blogspot.com/2024/08/1-with-claude-api.html)를 참고하세요.
+
+일부 오역이나, 과도한 음역이 포함되어 있을 수 있습니다.
 
 ---
 
-<p align="center"><i>Starlette is <a href="https://github.com/encode/starlette/blob/master/LICENSE.md">BSD licensed</a> code.<br/>Designed & crafted with care.</i></br>&mdash; ⭐️ &mdash;</p>
+<p align="center"><i>Starlette는 <a href="https://github.com/encode/starlette/blob/master/LICENSE.md">BSD 라이선스</a> 코드입니다.<br/>세심하게 설계되고 제작되었습니다.</i></br>&mdash; ⭐️ &mdash;</p>
 
 [asgi]: https://asgi.readthedocs.io/en/latest/
 [httpx]: https://www.python-httpx.org/

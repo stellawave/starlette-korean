@@ -1,6 +1,4 @@
-
-Starlette includes an application class `Starlette` that nicely ties together all of
-its other functionality.
+Starlette는 다른 모든 기능을 잘 연결하는 `Starlette`라는 애플리케이션 클래스를 포함하고 있습니다.
 
 ```python
 from starlette.applications import Starlette
@@ -10,23 +8,23 @@ from starlette.staticfiles import StaticFiles
 
 
 def homepage(request):
-    return PlainTextResponse('Hello, world!')
+    return PlainTextResponse('안녕하세요, 세계!')
 
 def user_me(request):
     username = "John Doe"
-    return PlainTextResponse('Hello, %s!' % username)
+    return PlainTextResponse('안녕하세요, %s님!' % username)
 
 def user(request):
     username = request.path_params['username']
-    return PlainTextResponse('Hello, %s!' % username)
+    return PlainTextResponse('안녕하세요, %s님!' % username)
 
 async def websocket_endpoint(websocket):
     await websocket.accept()
-    await websocket.send_text('Hello, websocket!')
+    await websocket.send_text('안녕하세요, 웹소켓!')
     await websocket.close()
 
 def startup():
-    print('Ready to go')
+    print('준비 완료')
 
 
 routes = [
@@ -40,22 +38,21 @@ routes = [
 app = Starlette(debug=True, routes=routes, on_startup=[startup])
 ```
 
-### Instantiating the application
+### 애플리케이션 인스턴스화
 
 ::: starlette.applications.Starlette
     :docstring:
 
-### Storing state on the app instance
+### 앱 인스턴스에 상태 저장하기
 
-You can store arbitrary extra state on the application instance, using the
-generic `app.state` attribute.
+제네릭 `app.state` 속성을 사용하여 애플리케이션 인스턴스에 임의의 추가 상태를 저장할 수 있습니다.
 
-For example:
+예를 들어:
 
 ```python
 app.state.ADMIN_EMAIL = 'admin@example.org'
 ```
 
-### Accessing the app instance
+### 앱 인스턴스에 접근하기
 
-Where a `request` is available (i.e. endpoints and middleware), the app is available on `request.app`.
+`request`가 사용 가능한 곳(즉, 엔드포인트와 미들웨어)에서는 `request.app`을 통해 앱에 접근할 수 있습니다.

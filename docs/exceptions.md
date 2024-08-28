@@ -1,6 +1,4 @@
-
-Starlette allows you to install custom exception handlers to deal with
-how you return responses when errors or handled exceptions occur.
+Starlette는 오류나 처리된 예외가 발생했을 때 응답을 반환하는 방식을 처리하기 위해 사용자 정의 예외 처리기를 설치할 수 있도록 합니다.
 
 ```python
 from starlette.applications import Starlette
@@ -28,18 +26,15 @@ exception_handlers = {
 app = Starlette(routes=routes, exception_handlers=exception_handlers)
 ```
 
-If `debug` is enabled and an error occurs, then instead of using the installed
-500 handler, Starlette will respond with a traceback response.
+`debug`가 활성화되어 있고 오류가 발생하면, Starlette는 설치된 500 핸들러를 사용하는 대신 트레이스백 응답을 반환합니다.
 
 ```python
 app = Starlette(debug=True, routes=routes, exception_handlers=exception_handlers)
 ```
 
-As well as registering handlers for specific status codes, you can also
-register handlers for classes of exceptions.
+특정 상태 코드에 대한 핸들러를 등록하는 것 외에도, 예외 클래스에 대한 핸들러를 등록할 수 있습니다.
 
-In particular you might want to override how the built-in `HTTPException` class
-is handled. For example, to use JSON style responses:
+특히 내장된 `HTTPException` 클래스의 처리 방식을 재정의하고 싶을 수 있습니다. 예를 들어, JSON 스타일의 응답을 사용하려면:
 
 ```python
 async def http_exception(request: Request, exc: HTTPException):
@@ -50,8 +45,7 @@ exception_handlers = {
 }
 ```
 
-The `HTTPException` is also equipped with the `headers` argument. Which allows the propagation
-of the headers to the response class:
+`HTTPException`은 `headers` 인자도 갖추고 있습니다. 이를 통해 헤더를 응답 클래스로 전파할 수 있습니다:
 
 ```python
 async def http_exception(request: Request, exc: HTTPException):
@@ -62,7 +56,7 @@ async def http_exception(request: Request, exc: HTTPException):
     )
 ```
 
-You might also want to override how `WebSocketException` is handled:
+`WebSocketException`의 처리 방식을 재정의하고 싶을 수도 있습니다:
 
 ```python
 async def websocket_exception(websocket: WebSocket, exc: WebSocketException):
@@ -73,61 +67,48 @@ exception_handlers = {
 }
 ```
 
-## Errors and handled exceptions
+## 오류 및 처리된 예외
 
-It is important to differentiate between handled exceptions and errors.
+처리된 예외와 오류를 구분하는 것이 중요합니다.
 
-Handled exceptions do not represent error cases. They are coerced into appropriate
-HTTP responses, which are then sent through the standard middleware stack. By default
-the `HTTPException` class is used to manage any handled exceptions.
+처리된 예외는 오류 상황을 나타내지 않습니다. 이들은 적절한 HTTP 응답으로 변환되어 표준 미들웨어 스택을 통해 전송됩니다. 기본적으로 `HTTPException` 클래스가 처리된 예외를 관리하는 데 사용됩니다.
 
-Errors are any other exception that occurs within the application. These cases
-should bubble through the entire middleware stack as exceptions. Any error
-logging middleware should ensure that it re-raises the exception all the
-way up to the server.
+오류는 애플리케이션 내에서 발생하는 다른 모든 예외입니다. 이러한 경우는 전체 미들웨어 스택을 통해 예외로 버블링되어야 합니다. 오류 로깅 미들웨어는 예외를 서버까지 다시 발생시키도록 해야 합니다.
 
-In practical terms, the error handled used is `exception_handler[500]` or `exception_handler[Exception]`.
-Both keys `500` and `Exception` can be used. See below:
+실제로 사용되는 오류 처리기는 `exception_handler[500]` 또는 `exception_handler[Exception]`입니다. `500`과 `Exception` 키 모두 사용할 수 있습니다. 아래를 참조하세요:
 
 ```python
 async def handle_error(request: Request, exc: HTTPException):
-    # Perform some logic
+    # 일부 로직 수행
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 exception_handlers = {
-    Exception: handle_error  # or "500: handle_error"
+    Exception: handle_error  # 또는 "500: handle_error"
 }
 ```
 
-It's important to notice that in case a [`BackgroundTask`](https://www.starlette.io/background/) raises an exception,
-it will be handled by the `handle_error` function, but at that point, the response was already sent. In other words,
-the response created by `handle_error` will be discarded. In case the error happens before the response was sent, then
-it will use the response object - in the above example, the returned `JSONResponse`.
+[`BackgroundTask`](https://www.starlette.io/background/)가 예외를 발생시키는 경우, `handle_error` 함수에 의해 처리되지만 그 시점에서 응답이 이미 전송되었음을 주의해야 합니다. 다시 말해, `handle_error`에 의해 생성된 응답은 무시됩니다. 응답이 전송되기 전에 오류가 발생한 경우에는 응답 객체를 사용합니다 - 위의 예에서는 반환된 `JSONResponse`를 사용합니다.
 
-In order to deal with this behaviour correctly, the middleware stack of a
-`Starlette` application is configured like this:
+이러한 동작을 올바르게 처리하기 위해 `Starlette` 애플리케이션의 미들웨어 스택은 다음과 같이 구성됩니다:
 
-* `ServerErrorMiddleware` - Returns 500 responses when server errors occur.
-* Installed middleware
-* `ExceptionMiddleware` - Deals with handled exceptions, and returns responses.
-* Router
-* Endpoints
+* `ServerErrorMiddleware` - 서버 오류 발생 시 500 응답을 반환합니다.
+* 설치된 미들웨어
+* `ExceptionMiddleware` - 처리된 예외를 다루고 응답을 반환합니다.
+* 라우터
+* 엔드포인트
 
 ## HTTPException
 
-The `HTTPException` class provides a base class that you can use for any
-handled exceptions. The `ExceptionMiddleware` implementation defaults to
-returning plain-text HTTP responses for any `HTTPException`.
+`HTTPException` 클래스는 처리된 예외에 사용할 수 있는 기본 클래스를 제공합니다. `ExceptionMiddleware` 구현은 기본적으로 모든 `HTTPException`에 대해 일반 텍스트 HTTP 응답을 반환합니다.
 
 * `HTTPException(status_code, detail=None, headers=None)`
 
-You should only raise `HTTPException` inside routing or endpoints. Middleware
-classes should instead just return appropriate responses directly.
+`HTTPException`은 라우팅이나 엔드포인트 내에서만 발생시켜야 합니다. 미들웨어 클래스는 대신 적절한 응답을 직접 반환해야 합니다.
 
 ## WebSocketException
 
-You can use the `WebSocketException` class to raise errors inside of WebSocket endpoints.
+WebSocket 엔드포인트 내에서 오류를 발생시키기 위해 `WebSocketException` 클래스를 사용할 수 있습니다.
 
 * `WebSocketException(code=1008, reason=None)`
 
-You can set any code valid as defined [in the specification](https://tools.ietf.org/html/rfc6455#section-7.4.1).
+[사양에 정의된](https://tools.ietf.org/html/rfc6455#section-7.4.1) 유효한 코드를 설정할 수 있습니다.

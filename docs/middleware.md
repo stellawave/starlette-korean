@@ -1,12 +1,8 @@
-
-Starlette includes several middleware classes for adding behavior that is applied across
-your entire application. These are all implemented as standard ASGI
-middleware classes, and can be applied either to Starlette or to any other ASGI application.
+Starlette는 전체 애플리케이션에 적용되는 동작을 추가하기 위한 여러 미들웨어 클래스를 포함하고 있습니다. 이들은 모두 표준 ASGI 미들웨어 클래스로 구현되어 있으며, Starlette나 다른 ASGI 애플리케이션에 적용할 수 있습니다.
 
 ## Using middleware
 
-The Starlette application class allows you to include the ASGI middleware
-in a way that ensures that it remains wrapped by the exception handler.
+Starlette 애플리케이션 클래스를 사용하면 예외 핸들러로 감싸진 상태를 유지하면서 ASGI 미들웨어를 포함할 수 있습니다.
 
 ```python
 from starlette.applications import Starlette
@@ -16,8 +12,8 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 routes = ...
 
-# Ensure that all requests include an 'example.com' or
-# '*.example.com' host header, and strictly enforce https-only access.
+# 모든 요청에 'example.com' 또는 '*.example.com' 호스트 헤더가 포함되도록 하고,
+# https-only 접근을 엄격하게 강제합니다.
 middleware = [
     Middleware(
         TrustedHostMiddleware,
@@ -29,31 +25,28 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-Every Starlette application automatically includes two pieces of middleware by default:
+모든 Starlette 애플리케이션은 기본적으로 두 가지 미들웨어를 자동으로 포함합니다:
 
-* `ServerErrorMiddleware` - Ensures that application exceptions may return a custom 500 page, or display an application traceback in DEBUG mode. This is *always* the outermost middleware layer.
-* `ExceptionMiddleware` - Adds exception handlers, so that particular types of expected exception cases can be associated with handler functions. For example raising `HTTPException(status_code=404)` within an endpoint will end up rendering a custom 404 page.
+* `ServerErrorMiddleware` - 애플리케이션 예외가 사용자 정의 500 페이지를 반환하거나 DEBUG 모드에서 애플리케이션 트레이스백을 표시할 수 있도록 합니다. 이는 *항상* 가장 바깥쪽 미들웨어 계층입니다.
+* `ExceptionMiddleware` - 예외 핸들러를 추가하여 특정 유형의 예상된 예외 케이스를 핸들러 함수와 연결할 수 있게 합니다. 예를 들어, 엔드포인트 내에서 `HTTPException(status_code=404)`를 발생시키면 사용자 정의 404 페이지가 렌더링됩니다.
 
-Middleware is evaluated from top-to-bottom, so the flow of execution in our example
-application would look like this:
+미들웨어는 위에서 아래로 평가되므로, 예제 애플리케이션의 실행 흐름은 다음과 같습니다:
 
-* Middleware
+* 미들웨어
     * `ServerErrorMiddleware`
     * `TrustedHostMiddleware`
     * `HTTPSRedirectMiddleware`
     * `ExceptionMiddleware`
-* Routing
-* Endpoint
+* 라우팅
+* 엔드포인트
 
-The following middleware implementations are available in the Starlette package:
+Starlette 패키지에서 사용 가능한 미들웨어 구현은 다음과 같습니다:
 
 ## CORSMiddleware
 
-Adds appropriate [CORS headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) to outgoing responses in order to allow cross-origin requests from browsers.
+브라우저에서의 교차 출처 요청을 허용하기 위해 나가는 응답에 적절한 [CORS 헤더](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)를 추가합니다.
 
-The default parameters used by the CORSMiddleware implementation are restrictive by default,
-so you'll need to explicitly enable particular origins, methods, or headers, in order
-for browsers to be permitted to use them in a Cross-Domain context.
+CORSMiddleware 구현에서 사용되는 기본 매개변수는 기본적으로 제한적이므로, 브라우저가 교차 도메인 컨텍스트에서 특정 출처, 메서드 또는 헤더를 사용할 수 있도록 허용하려면 명시적으로 활성화해야 합니다.
 
 ```python
 from starlette.applications import Starlette
@@ -69,45 +62,41 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-The following arguments are supported:
+다음 인자들이 지원됩니다:
 
-* `allow_origins` - A list of origins that should be permitted to make cross-origin requests. eg. `['https://example.org', 'https://www.example.org']`. You can use `['*']` to allow any origin.
-* `allow_origin_regex` - A regex string to match against origins that should be permitted to make cross-origin requests. eg. `'https://.*\.example\.org'`.
-* `allow_methods` - A list of HTTP methods that should be allowed for cross-origin requests. Defaults to `['GET']`. You can use `['*']` to allow all standard methods.
-* `allow_headers` - A list of HTTP request headers that should be supported for cross-origin requests. Defaults to `[]`. You can use `['*']` to allow all headers. The `Accept`, `Accept-Language`, `Content-Language` and `Content-Type` headers are always allowed for CORS requests.
-* `allow_credentials` - Indicate that cookies should be supported for cross-origin requests. Defaults to `False`. Also, `allow_origins`, `allow_methods` and `allow_headers` cannot be set to `['*']` for credentials to be allowed, all of them must be explicitly specified.
-* `expose_headers` - Indicate any response headers that should be made accessible to the browser. Defaults to `[]`.
-* `max_age` - Sets a maximum time in seconds for browsers to cache CORS responses. Defaults to `600`.
+* `allow_origins` - 교차 출처 요청을 허용해야 하는 출처 목록입니다. 예: `['https://example.org', 'https://www.example.org']`. `['*']`를 사용하여 모든 출처를 허용할 수 있습니다.
+* `allow_origin_regex` - 교차 출처 요청을 허용해야 하는 출처와 일치시킬 정규식 문자열입니다. 예: `'https://.*\.example\.org'`.
+* `allow_methods` - 교차 출처 요청에 대해 허용되어야 하는 HTTP 메서드 목록입니다. 기본값은 `['GET']`입니다. `['*']`를 사용하여 모든 표준 메서드를 허용할 수 있습니다.
+* `allow_headers` - 교차 출처 요청에 대해 지원되어야 하는 HTTP 요청 헤더 목록입니다. 기본값은 `[]`입니다. `['*']`를 사용하여 모든 헤더를 허용할 수 있습니다. `Accept`, `Accept-Language`, `Content-Language`, `Content-Type` 헤더는 CORS 요청에 대해 항상 허용됩니다.
+* `allow_credentials` - 교차 출처 요청에 대해 쿠키를 지원해야 함을 나타냅니다. 기본값은 `False`입니다. 또한 자격 증명을 허용하려면 `allow_origins`, `allow_methods`, `allow_headers`를 `['*']`로 설정할 수 없으며, 모두 명시적으로 지정해야 합니다.
+* `expose_headers` - 브라우저에서 접근 가능해야 하는 응답 헤더를 나타냅니다. 기본값은 `[]`입니다.
+* `max_age` - 브라우저가 CORS 응답을 캐시하는 최대 시간(초)을 설정합니다. 기본값은 `600`입니다.
 
-The middleware responds to two particular types of HTTP request...
+미들웨어는 두 가지 특정 유형의 HTTP 요청에 응답합니다...
 
-#### CORS preflight requests
+#### CORS 프리플라이트 요청
 
-These are any `OPTIONS` request with `Origin` and `Access-Control-Request-Method` headers.
-In this case the middleware will intercept the incoming request and respond with
-appropriate CORS headers, and either a 200 or 400 response for informational purposes.
+`Origin`과 `Access-Control-Request-Method` 헤더가 있는 모든 `OPTIONS` 요청입니다. 이 경우 미들웨어는 들어오는 요청을 가로채고 적절한 CORS 헤더와 함께 정보 제공을 위해 200 또는 400 응답을 반환합니다.
 
-#### Simple requests
+#### 단순 요청
 
-Any request with an `Origin` header. In this case the middleware will pass the
-request through as normal, but will include appropriate CORS headers on the response.
+`Origin` 헤더가 있는 모든 요청입니다. 이 경우 미들웨어는 요청을 정상적으로 통과시키지만, 응답에 적절한 CORS 헤더를 포함시킵니다.
 
 ## SessionMiddleware
 
-Adds signed cookie-based HTTP sessions. Session information is readable but not modifiable.
+서명된 쿠키 기반 HTTP 세션을 추가합니다. 세션 정보는 읽을 수 있지만 수정할 수는 없습니다.
 
-Access or modify the session data using the `request.session` dictionary interface.
+`request.session` 딕셔너리 인터페이스를 사용하여 세션 데이터에 접근하거나 수정합니다.
 
-The following arguments are supported:
+다음 인자들이 지원됩니다:
 
-* `secret_key` - Should be a random string.
-* `session_cookie` - Defaults to "session".
-* `max_age` - Session expiry time in seconds. Defaults to 2 weeks. If set to `None` then the cookie will last as long as the browser session.
-* `same_site` - SameSite flag prevents the browser from sending session cookie along with cross-site requests. Defaults to `'lax'`.
-* `path` - The path set for the session cookie. Defaults to `'/'`.
-* `https_only` - Indicate that Secure flag should be set (can be used with HTTPS only). Defaults to `False`.
-* `domain` - Domain of the cookie used to share cookie between subdomains or cross-domains. The browser defaults the domain to the same host that set the cookie, excluding subdomains ([reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#domain_attribute)).
-
+* `secret_key` - 무작위 문자열이어야 합니다.
+* `session_cookie` - 기본값은 "session"입니다.
+* `max_age` - 세션 만료 시간(초)입니다. 기본값은 2주입니다. `None`으로 설정하면 쿠키가 브라우저 세션 동안 유지됩니다.
+* `same_site` - SameSite 플래그는 브라우저가 교차 사이트 요청과 함께 세션 쿠키를 보내는 것을 방지합니다. 기본값은 `'lax'`입니다.
+* `path` - 세션 쿠키에 설정된 경로입니다. 기본값은 `'/'`입니다.
+* `https_only` - Secure 플래그를 설정해야 함을 나타냅니다(HTTPS에서만 사용 가능). 기본값은 `False`입니다.
+* `domain` - 서브도메인 간 또는 교차 도메인 간 쿠키를 공유하는 데 사용되는 쿠키의 도메인입니다. 브라우저는 기본적으로 도메인을 쿠키를 설정한 동일한 호스트로 설정하며, 서브도메인은 제외합니다([참조](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#domain_attribute)).
 
 ```python
 from starlette.applications import Starlette
@@ -125,8 +114,7 @@ app = Starlette(routes=routes, middleware=middleware)
 
 ## HTTPSRedirectMiddleware
 
-Enforces that all incoming requests must either be `https` or `wss`. Any incoming
-requests to `http` or `ws` will be redirected to the secure scheme instead.
+모든 들어오는 요청이 `https` 또는 `wss`여야 함을 강제합니다. `http` 또는 `ws`로 들어오는 모든 요청은 대신 보안 스키마로 리다이렉트됩니다.
 
 ```python
 from starlette.applications import Starlette
@@ -142,12 +130,11 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-There are no configuration options for this middleware class.
+이 미들웨어 클래스에는 구성 옵션이 없습니다.
 
 ## TrustedHostMiddleware
 
-Enforces that all incoming requests have a correctly set `Host` header, in order
-to guard against HTTP Host Header attacks.
+HTTP 호스트 헤더 공격을 방지하기 위해 모든 들어오는 요청에 `Host` 헤더가 올바르게 설정되어 있는지 강제합니다.
 
 ```python
 from starlette.applications import Starlette
@@ -163,20 +150,18 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-The following arguments are supported:
+다음 인수가 지원됩니다:
 
-* `allowed_hosts` - A list of domain names that should be allowed as hostnames. Wildcard
-domains such as `*.example.com` are supported for matching subdomains. To allow any
-hostname either use `allowed_hosts=["*"]` or omit the middleware.
-* `www_redirect` - If set to True, requests to non-www versions of the allowed hosts will be redirected to their www counterparts. Defaults to `True`.
+* `allowed_hosts` - 호스트 이름으로 허용되어야 하는 도메인 이름 목록입니다. `*.example.com`과 같은 와일드카드 도메인이 서브도메인 매칭을 위해 지원됩니다. 모든 호스트 이름을 허용하려면 `allowed_hosts=["*"]`를 사용하거나 미들웨어를 생략하세요.
+* `www_redirect` - True로 설정하면 허용된 호스트의 non-www 버전에 대한 요청이 www 버전으로 리다이렉트됩니다. 기본값은 `True`입니다.
 
-If an incoming request does not validate correctly then a 400 response will be sent.
+들어오는 요청이 올바르게 검증되지 않으면 400 응답이 전송됩니다.
 
 ## GZipMiddleware
 
-Handles GZip responses for any request that includes `"gzip"` in the `Accept-Encoding` header.
+`Accept-Encoding` 헤더에 `"gzip"`이 포함된 모든 요청에 대해 GZip 응답을 처리합니다.
 
-The middleware will handle both standard and streaming responses.
+이 미들웨어는 표준 응답과 스트리밍 응답을 모두 처리합니다.
 
 ```python
 from starlette.applications import Starlette
@@ -193,22 +178,20 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-The following arguments are supported:
+다음 인수가 지원됩니다:
 
-* `minimum_size` - Do not GZip responses that are smaller than this minimum size in bytes. Defaults to `500`.
-* `compresslevel` - Used during GZip compression. It is an integer ranging from 1 to 9. Defaults to `9`. Lower value results in faster compression but larger file sizes, while higher value results in slower compression but smaller file sizes.
+* `minimum_size` - 이 최소 크기(바이트)보다 작은 응답은 GZip 압축하지 않습니다. 기본값은 `500`입니다.
+* `compresslevel` - GZip 압축 중 사용됩니다. 1에서 9 사이의 정수입니다. 기본값은 `9`입니다. 낮은 값은 더 빠른 압축을 제공하지만 파일 크기가 더 크고, 높은 값은 더 느린 압축을 제공하지만 파일 크기가 더 작습니다.
 
-The middleware won't GZip responses that already have a `Content-Encoding` set, to prevent them from being encoded twice.
+이 미들웨어는 이미 `Content-Encoding`이 설정된 응답은 두 번 인코딩되는 것을 방지하기 위해 GZip 압축하지 않습니다.
 
 ## BaseHTTPMiddleware
 
-An abstract class that allows you to write ASGI middleware against a request/response
-interface.
+요청/응답 인터페이스에 대해 ASGI 미들웨어를 작성할 수 있게 해주는 추상 클래스입니다.
 
-### Usage
+### 사용법
 
-To implement a middleware class using `BaseHTTPMiddleware`, you must override the
-`async def dispatch(request, call_next)` method.
+`BaseHTTPMiddleware`를 사용하여 미들웨어 클래스를 구현하려면 `async def dispatch(request, call_next)` 메서드를 오버라이드해야 합니다.
 
 ```python
 from starlette.applications import Starlette
@@ -231,10 +214,7 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-If you want to provide configuration options to the middleware class you should
-override the `__init__` method, ensuring that the first argument is `app`, and
-any remaining arguments are optional keyword arguments. Make sure to set the `app`
-attribute on the instance if you do this.
+미들웨어 클래스에 설정 옵션을 제공하려면 `__init__` 메서드를 오버라이드해야 합니다. 첫 번째 인수가 `app`이고 나머지 인수는 선택적 키워드 인수여야 합니다. 이렇게 할 경우 인스턴스에 `app` 속성을 설정해야 합니다.
 
 ```python
 class CustomHeaderMiddleware(BaseHTTPMiddleware):
@@ -255,27 +235,25 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
-Middleware classes should not modify their state outside of the `__init__` method.
-Instead you should keep any state local to the `dispatch` method, or pass it
-around explicitly, rather than mutating the middleware instance.
+미들웨어 클래스는 `__init__` 메서드 외부에서 상태를 수정하지 않아야 합니다. 대신 상태를 `dispatch` 메서드 내에서 로컬로 유지하거나 명시적으로 전달해야 하며, 미들웨어 인스턴스를 변경해서는 안 됩니다.
 
 ### Limitations
 
-Currently, the `BaseHTTPMiddleware` has some known limitations:
+현재 `BaseHTTPMiddleware`에는 몇 가지 알려진 한계가 있습니다:
 
-- Using `BaseHTTPMiddleware` will prevent changes to [`contextlib.ContextVar`](https://docs.python.org/3/library/contextvars.html#contextvars.ContextVar)s from propagating upwards. That is, if you set a value for a `ContextVar` in your endpoint and try to read it from a middleware you will find that the value is not the same value you set in your endpoint (see [this test](https://github.com/encode/starlette/blob/621abc747a6604825190b93467918a0ec6456a24/tests/middleware/test_base.py#L192-L223) for an example of this behavior).
+- `BaseHTTPMiddleware`를 사용하면 [`contextlib.ContextVar`](https://docs.python.org/3/library/contextvars.html#contextvars.ContextVar)의 변경 사항이 상위로 전파되지 않습니다. 즉, 엔드포인트에서 `ContextVar`의 값을 설정하고 미들웨어에서 읽으려고 하면 엔드포인트에서 설정한 값과 동일하지 않다는 것을 발견하게 됩니다 (이 동작의 예시는 [이 테스트](https://github.com/encode/starlette/blob/621abc747a6604825190b93467918a0ec6456a24/tests/middleware/test_base.py#L192-L223)를 참조하세요).
 
-To overcome these limitations, use [pure ASGI middleware](#pure-asgi-middleware), as shown below.
+이러한 한계를 극복하려면 아래에 설명된 [순수 ASGI 미들웨어](#pure-asgi-middleware)를 사용하세요.
 
-## Pure ASGI Middleware
+## pure asgi middleware
 
-The [ASGI spec](https://asgi.readthedocs.io/en/latest/) makes it possible to implement ASGI middleware using the ASGI interface directly, as a chain of ASGI applications that call into the next one. In fact, this is how middleware classes shipped with Starlette are implemented.
+[ASGI 스펙](https://asgi.readthedocs.io/en/latest/)은 ASGI 인터페이스를 직접 사용하여 ASGI 미들웨어를 구현할 수 있게 합니다. 이는 다음 ASGI 애플리케이션을 호출하는 ASGI 애플리케이션 체인으로 구현됩니다. 실제로 Starlette에 포함된 미들웨어 클래스들이 이렇게 구현되어 있습니다.
 
-This lower-level approach provides greater control over behavior and enhanced interoperability across frameworks and servers. It also overcomes the [limitations of `BaseHTTPMiddleware`](#limitations).
+이 저수준 접근 방식은 동작에 대한 더 큰 제어권과 프레임워크 및 서버 간의 향상된 상호 운용성을 제공합니다. 또한 [`BaseHTTPMiddleware`의 한계](#limitations)를 극복합니다.
 
-### Writing pure ASGI middleware
+### 순수 ASGI 미들웨어 작성하기
 
-The most common way to create an ASGI middleware is with a class.
+ASGI 미들웨어를 만드는 가장 일반적인 방법은 클래스를 사용하는 것입니다.
 
 ```python
 class ASGIMiddleware:
@@ -286,9 +264,9 @@ class ASGIMiddleware:
         await self.app(scope, receive, send)
 ```
 
-The middleware above is the most basic ASGI middleware. It receives a parent ASGI application as an argument for its constructor, and implements an `async __call__` method which calls into that parent application.
+위의 미들웨어는 가장 기본적인 ASGI 미들웨어입니다. 생성자 인수로 부모 ASGI 애플리케이션을 받고, 그 부모 애플리케이션을 호출하는 `async __call__` 메서드를 구현합니다.
 
-Some implementations such as [`asgi-cors`](https://github.com/simonw/asgi-cors/blob/10ef64bfcc6cd8d16f3014077f20a0fb8544ec39/asgi_cors.py) use an alternative style, using functions:
+[`asgi-cors`](https://github.com/simonw/asgi-cors/blob/10ef64bfcc6cd8d16f3014077f20a0fb8544ec39/asgi_cors.py)와 같은 일부 구현은 함수를 사용하는 대안적 스타일을 사용합니다:
 
 ```python
 import functools
@@ -305,17 +283,17 @@ def asgi_middleware():
     return asgi_decorator
 ```
 
-In any case, ASGI middleware must be callables that accept three arguments: `scope`, `receive`, and `send`.
+어떤 경우든, ASGI 미들웨어는 `scope`, `receive`, `send` 세 가지 인수를 받는 호출 가능한 객체여야 합니다.
 
-* `scope` is a dict holding information about the connection, where `scope["type"]` may be:
-    * [`"http"`](https://asgi.readthedocs.io/en/latest/specs/www.html#http-connection-scope): for HTTP requests.
-    * [`"websocket"`](https://asgi.readthedocs.io/en/latest/specs/www.html#websocket-connection-scope): for WebSocket connections.
-    * [`"lifespan"`](https://asgi.readthedocs.io/en/latest/specs/lifespan.html#scope): for ASGI lifespan messages.
-* `receive` and `send` can be used to exchange ASGI event messages with the ASGI server — more on this below. The type and contents of these messages depend on the scope type. Learn more in the [ASGI specification](https://asgi.readthedocs.io/en/latest/specs/index.html).
+* `scope`는 연결에 대한 정보를 담고 있는 딕셔너리입니다. `scope["type"]`은 다음 중 하나일 수 있습니다:
+    * [`"http"`](https://asgi.readthedocs.io/en/latest/specs/www.html#http-connection-scope): HTTP 요청의 경우.
+    * [`"websocket"`](https://asgi.readthedocs.io/en/latest/specs/www.html#websocket-connection-scope): WebSocket 연결의 경우.
+    * [`"lifespan"`](https://asgi.readthedocs.io/en/latest/specs/lifespan.html#scope): ASGI 라이프스팬 메시지의 경우.
+* `receive`와 `send`는 ASGI 서버와 ASGI 이벤트 메시지를 교환하는 데 사용할 수 있습니다 - 이에 대해서는 아래에서 더 자세히 설명합니다. 이 메시지의 유형과 내용은 스코프 유형에 따라 다릅니다. 자세한 내용은 [ASGI 명세](https://asgi.readthedocs.io/en/latest/specs/index.html)를 참조하세요.
 
-### Using pure ASGI middleware
+### 순수 ASGI 미들웨어 사용하기
 
-Pure ASGI middleware can be used like any other middleware:
+순수 ASGI 미들웨어는 다른 미들웨어와 마찬가지로 사용할 수 있습니다:
 
 ```python
 from starlette.applications import Starlette
@@ -332,13 +310,13 @@ middleware = [
 app = Starlette(..., middleware=middleware)
 ```
 
-See also [Using middleware](#using-middleware).
+[미들웨어 사용하기](#using-middleware)도 참조하세요.
 
-### Type annotations
+### 타입 어노테이션
 
-There are two ways of annotating a middleware: using Starlette itself or [`asgiref`](https://github.com/django/asgiref).
+미들웨어에 어노테이션을 추가하는 방법에는 Starlette 자체를 사용하는 방법과 [`asgiref`](https://github.com/django/asgiref)를 사용하는 방법 두 가지가 있습니다.
 
-* Using Starlette: for most common use cases.
+* Starlette 사용: 가장 일반적인 사용 사례에 적합합니다.
 
 ```python
 from starlette.types import ASGIApp, Message, Scope, Receive, Send
@@ -353,13 +331,13 @@ class ASGIMiddleware:
             return await self.app(scope, receive, send)
 
         async def send_wrapper(message: Message) -> None:
-            # ... Do something
+            # ... 무언가를 수행
             await send(message)
 
         await self.app(scope, receive, send_wrapper)
 ```
 
-* Using [`asgiref`](https://github.com/django/asgiref): for more rigorous type hinting.
+* [`asgiref`](https://github.com/django/asgiref) 사용: 더 엄격한 타입 힌팅을 위해 사용합니다.
 
 ```python
 from asgiref.typing import ASGI3Application, ASGIReceiveCallable, ASGISendCallable, Scope
@@ -376,19 +354,19 @@ class ASGIMiddleware:
             return
 
         async def send_wrapper(message: ASGISendEvent) -> None:
-            # ... Do something
+            # ... 무언가를 수행
             await send(message)
 
         return await self.app(scope, receive, send_wrapper)
 ```
 
-### Common patterns
+### 일반적인 패턴
 
-#### Processing certain requests only
+#### 특정 요청만 처리하기
 
-ASGI middleware can apply specific behavior according to the contents of `scope`.
+ASGI 미들웨어는 `scope`의 내용에 따라 특정 동작을 적용할 수 있습니다.
 
-For example, to only process HTTP requests, write this...
+예를 들어, HTTP 요청만 처리하려면 다음과 같이 작성하세요...
 
 ```python
 class ASGIMiddleware:
@@ -400,20 +378,20 @@ class ASGIMiddleware:
             await self.app(scope, receive, send)
             return
 
-        ...  # Do something here!
+        ...  # 여기서 무언가를 수행하세요!
 
         await self.app(scope, receive, send)
 ```
 
-Likewise, WebSocket-only middleware would guard on `scope["type"] != "websocket"`.
+마찬가지로, WebSocket 전용 미들웨어는 `scope["type"] != "websocket"`으로 검사합니다.
 
-The middleware may also act differently based on the request method, URL, headers, etc.
+미들웨어는 요청 메서드, URL, 헤더 등에 따라 다르게 동작할 수도 있습니다.
 
-#### Reusing Starlette components
+#### Starlette 컴포넌트 재사용하기
 
-Starlette provides several data structures that accept the ASGI `scope`, `receive` and/or `send` arguments, allowing you to work at a higher level of abstraction. Such data structures include [`Request`](requests.md#request), [`Headers`](requests.md#headers), [`QueryParams`](requests.md#query-parameters), [`URL`](requests.md#url), etc.
+Starlette는 ASGI `scope`, `receive` 및/또는 `send` 인자를 받아들이는 여러 데이터 구조를 제공하여 더 높은 수준의 추상화로 작업할 수 있게 합니다. 이러한 데이터 구조에는 [`Request`](requests.md#request), [`Headers`](requests.md#headers), [`QueryParams`](requests.md#query-parameters), [`URL`](requests.md#url) 등이 포함됩니다.
 
-For example, you can instantiate a `Request` to more easily inspect an HTTP request:
+예를 들어, `Request`를 인스턴스화하여 HTTP 요청을 더 쉽게 검사할 수 있습니다:
 
 ```python
 from starlette.requests import Request
@@ -425,18 +403,18 @@ class ASGIMiddleware:
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http":
             request = Request(scope)
-            ... # Use `request.method`, `request.url`, `request.headers`, etc.
+            ... # `request.method`, `request.url`, `request.headers` 등을 사용
 
         await self.app(scope, receive, send)
 ```
 
-You can also reuse [responses](responses.md), which are ASGI applications as well.
+또한 [responses](responses.md)를 재사용할 수 있습니다. 이들도 ASGI 애플리케이션입니다.
 
-#### Sending eager responses
+#### 즉시 응답 보내기
 
-Inspecting the connection `scope` allows you to conditionally call into a different ASGI app. One use case might be sending a response without calling into the app.
+연결 `scope`를 검사하면 조건에 따라 다른 ASGI 앱을 호출할 수 있습니다. 한 가지 사용 사례는 앱을 호출하지 않고 응답을 보내는 것입니다.
 
-As an example, this middleware uses a dictionary to perform permanent redirects based on the requested path. This could be used to implement ongoing support of legacy URLs in case you need to refactor route URL patterns.
+예를 들어, 이 미들웨어는 요청된 경로를 기반으로 영구 리다이렉트를 수행하기 위해 딕셔너리를 사용합니다. 이는 라우트 URL 패턴을 리팩토링해야 할 경우 레거시 URL에 대한 지속적인 지원을 구현하는 데 사용될 수 있습니다.
 
 ```python
 from starlette.datastructures import URL
@@ -463,7 +441,7 @@ class RedirectsMiddleware:
         await self.app(scope, receive, send)
 ```
 
-Example usage would look like this:
+사용 예시는 다음과 같습니다:
 
 ```python
 from starlette.applications import Starlette
@@ -483,14 +461,13 @@ middleware = [
 app = Starlette(routes=routes, middleware=middleware)
 ```
 
+#### 요청 검사 또는 수정
 
-#### Inspecting or modifying the request
+요청 정보는 `scope`를 조작하여 액세스하거나 변경할 수 있습니다. 이 패턴의 완전한 예시는 Uvicorn의 [`ProxyHeadersMiddleware`](https://github.com/encode/uvicorn/blob/fd4386fefb8fe8a4568831a7d8b2930d5fb61455/uvicorn/middleware/proxy_headers.py)를 참조하세요. 이는 프론트엔드 프록시 뒤에서 서비스할 때 `scope`를 검사하고 조정합니다.
 
-Request information can be accessed or changed by manipulating the `scope`. For a full example of this pattern, see Uvicorn's [`ProxyHeadersMiddleware`](https://github.com/encode/uvicorn/blob/fd4386fefb8fe8a4568831a7d8b2930d5fb61455/uvicorn/middleware/proxy_headers.py) which inspects and tweaks the `scope` when serving behind a frontend proxy.
+또한, `receive` ASGI 호출 가능 객체를 래핑하면 [`http.request`](https://asgi.readthedocs.io/en/latest/specs/www.html#request-receive-event) ASGI 이벤트 메시지를 조작하여 HTTP 요청 본문에 액세스하거나 수정할 수 있습니다.
 
-Besides, wrapping the `receive` ASGI callable allows you to access or modify the HTTP request body by manipulating [`http.request`](https://asgi.readthedocs.io/en/latest/specs/www.html#request-receive-event) ASGI event messages.
-
-As an example, this middleware computes and logs the size of the incoming request body...
+예를 들어, 이 미들웨어는 들어오는 요청 본문의 크기를 계산하고 기록합니다...
 
 ```python
 class LoggedRequestBodySizeMiddleware:
@@ -513,22 +490,22 @@ class LoggedRequestBodySizeMiddleware:
             body_size += len(message.get("body", b""))
 
             if not message.get("more_body", False):
-                print(f"Size of request body was: {body_size} bytes")
+                print(f"요청 본문의 크기: {body_size} 바이트")
 
             return message
 
         await self.app(scope, receive_logging_request_body_size, send)
 ```
 
-Likewise, WebSocket middleware may manipulate [`websocket.receive`](https://asgi.readthedocs.io/en/latest/specs/www.html#receive-receive-event) ASGI event messages to inspect or alter incoming WebSocket data.
+마찬가지로, WebSocket 미들웨어는 [`websocket.receive`](https://asgi.readthedocs.io/en/latest/specs/www.html#receive-receive-event) ASGI 이벤트 메시지를 조작하여 들어오는 WebSocket 데이터를 검사하거나 변경할 수 있습니다.
 
-For an example that changes the HTTP request body, see [`msgpack-asgi`](https://github.com/florimondmanca/msgpack-asgi).
+HTTP 요청 본문을 변경하는 예시는 [`msgpack-asgi`](https://github.com/florimondmanca/msgpack-asgi)를 참조하세요.
 
-#### Inspecting or modifying the response
+#### 응답 검사 또는 수정
 
-Wrapping the `send` ASGI callable allows you to inspect or modify the HTTP response sent by the underlying application. To do so, react to [`http.response.start`](https://asgi.readthedocs.io/en/latest/specs/www.html#response-start-send-event) or [`http.response.body`](https://asgi.readthedocs.io/en/latest/specs/www.html#response-body-send-event) ASGI event messages.
+`send` ASGI 호출 가능 객체를 래핑하면 기본 애플리케이션이 보내는 HTTP 응답을 검사하거나 수정할 수 있습니다. 이를 위해 [`http.response.start`](https://asgi.readthedocs.io/en/latest/specs/www.html#response-start-send-event) 또는 [`http.response.body`](https://asgi.readthedocs.io/en/latest/specs/www.html#response-body-send-event) ASGI 이벤트 메시지에 반응하세요.
 
-As an example, this middleware adds some fixed extra response headers:
+예를 들어, 이 미들웨어는 고정된 추가 응답 헤더를 추가합니다:
 
 ```python
 from starlette.datastructures import MutableHeaders
@@ -553,17 +530,17 @@ class ExtraResponseHeadersMiddleware:
         await self.app(scope, receive, send_with_extra_headers)
 ```
 
-See also [`asgi-logger`](https://github.com/Kludex/asgi-logger/blob/main/asgi_logger/middleware.py) for an example that inspects the HTTP response and logs a configurable HTTP access log line.
+HTTP 응답을 검사하고 구성 가능한 HTTP 액세스 로그 라인을 기록하는 예시는 [`asgi-logger`](https://github.com/Kludex/asgi-logger/blob/main/asgi_logger/middleware.py)를 참조하세요.
 
-Likewise, WebSocket middleware may manipulate [`websocket.send`](https://asgi.readthedocs.io/en/latest/specs/www.html#send-send-event) ASGI event messages to inspect or alter outgoing WebSocket data.
+마찬가지로, WebSocket 미들웨어는 [`websocket.send`](https://asgi.readthedocs.io/en/latest/specs/www.html#send-send-event) ASGI 이벤트 메시지를 조작하여 나가는 WebSocket 데이터를 검사하거나 변경할 수 있습니다.
 
-Note that if you change the response body, you will need to update the response `Content-Length` header to match the new response body length. See [`brotli-asgi`](https://github.com/fullonic/brotli-asgi) for a complete example.
+응답 본문을 변경하는 경우 응답 `Content-Length` 헤더를 새 응답 본문 길이와 일치하도록 업데이트해야 합니다. 완전한 예시는 [`brotli-asgi`](https://github.com/fullonic/brotli-asgi)를 참조하세요.
 
-#### Passing information to endpoints
+#### 엔드포인트에 정보 전달
 
-If you need to share information with the underlying app or endpoints, you may store it into the `scope` dictionary. Note that this is a convention -- for example, Starlette uses this to share routing information with endpoints -- but it is not part of the ASGI specification. If you do so, be sure to avoid conflicts by using keys that have low chances of being used by other middleware or applications.
+기본 앱이나 엔드포인트와 정보를 공유해야 하는 경우 `scope` 사전에 저장할 수 있습니다. 이는 규약이라는 점에 유의하세요 - 예를 들어, Starlette는 이를 사용하여 라우팅 정보를 엔드포인트와 공유합니다 - 하지만 ASGI 사양의 일부는 아닙니다. 이를 수행하는 경우 다른 미들웨어나 애플리케이션에서 사용할 가능성이 낮은 키를 사용하여 충돌을 피해야 합니다.
 
-For example, when including the middleware below, endpoints would be able to access `request.scope["asgi_transaction_id"]`.
+예를 들어, 아래 미들웨어를 포함하면 엔드포인트에서 `request.scope["asgi_transaction_id"]`에 액세스할 수 있습니다.
 
 ```python
 import uuid
@@ -577,11 +554,11 @@ class TransactionIDMiddleware:
         await self.app(scope, receive, send)
 ```
 
-#### Cleanup and error handling
+#### 정리 및 오류 처리
 
-You can wrap the application in a `try/except/finally` block or a context manager to perform cleanup operations or do error handling.
+애플리케이션을 `try/except/finally` 블록이나 컨텍스트 관리자로 감싸서 정리 작업을 수행하거나 오류 처리를 할 수 있습니다.
 
-For example, the following middleware might collect metrics and process application exceptions...
+예를 들어, 다음 미들웨어는 메트릭을 수집하고 애플리케이션 예외를 처리할 수 있습니다...
 
 ```python
 import time
@@ -595,25 +572,25 @@ class MonitoringMiddleware:
         try:
             await self.app(scope, receive, send)
         except Exception as exc:
-            ...  # Process the exception
+            ...  # 예외 처리
             raise
         finally:
             end = time.time()
             elapsed = end - start
-            ...  # Submit `elapsed` as a metric to a monitoring backend
+            ...  # `elapsed`를 메트릭으로 모니터링 백엔드에 제출
 ```
 
-See also [`timing-asgi`](https://github.com/steinnes/timing-asgi) for a full example of this pattern.
+이 패턴의 전체 예시는 [`timing-asgi`](https://github.com/steinnes/timing-asgi)를 참조하세요.
 
-### Gotchas
+### 주의사항
 
-#### ASGI middleware should be stateless
+#### ASGI 미들웨어는 상태를 가지지 않아야 합니다
 
-Because ASGI is designed to handle concurrent requests, any connection-specific state should be scoped to the `__call__` implementation. Not doing so would typically lead to conflicting variable reads/writes across requests, and most likely bugs.
+ASGI는 동시 요청을 처리하도록 설계되었기 때문에, 연결별 상태는 `__call__` 구현 내에서 범위가 지정되어야 합니다. 그렇지 않으면 일반적으로 요청 간에 변수 읽기/쓰기가 충돌하고 버그가 발생할 가능성이 높습니다.
 
-As an example, this would conditionally replace the response body, if an `X-Mock` header is present in the response...
+예를 들어, 응답에 `X-Mock` 헤더가 있는 경우 조건부로 응답 본문을 대체하는 방법은 다음과 같습니다...
 
-=== "✅ Do"
+=== "✅ 이렇게 하세요"
 
     ```python
     from starlette.datastructures import Headers
@@ -628,9 +605,9 @@ As an example, this would conditionally replace the response body, if an `X-Mock
                 await self.app(scope, receive, send)
                 return
 
-            # A flag that we will turn `True` if the HTTP response
-            # has the 'X-Mock' header.
-            # ✅: Scoped to this function.
+            # HTTP 응답에 'X-Mock' 헤더가 있으면 
+            # `True`로 설정할 플래그입니다.
+            # ✅: 이 함수에 범위가 지정되어 있습니다.
             should_mock = False
 
             async def maybe_send_with_mock_content(message):
@@ -649,7 +626,7 @@ As an example, this would conditionally replace the response body, if an `X-Mock
             await self.app(scope, receive, maybe_send_with_mock_content)
     ```
 
-=== "❌ Don't"
+=== "❌ 이렇게 하지 마세요"
 
     ```python hl_lines="7-8"
     from starlette.datastructures import Headers
@@ -658,7 +635,7 @@ As an example, this would conditionally replace the response body, if an `X-Mock
         def __init__(self, app, content):
             self.app = app
             self.content = content
-            # ❌: This variable would be read and written across requests!
+            # ❌: 이 변수는 요청 간에 읽고 쓰여질 것입니다!
             self.should_mock = False
 
         async def __call__(self, scope, receive, send):
@@ -680,35 +657,33 @@ As an example, this would conditionally replace the response body, if an `X-Mock
             await self.app(scope, receive, maybe_send_with_mock_content)
     ```
 
-See also [`GZipMiddleware`](https://github.com/encode/starlette/blob/9ef1b91c9c043197da6c3f38aa153fd874b95527/starlette/middleware/gzip.py) for a full example implementation that navigates this potential gotcha.
+이 잠재적인 문제를 해결하는 전체 구현 예제는 [`GZipMiddleware`](https://github.com/encode/starlette/blob/9ef1b91c9c043197da6c3f38aa153fd874b95527/starlette/middleware/gzip.py)를 참조하세요.
 
-### Further reading
+### 추가 읽을거리
 
-This documentation should be enough to have a good basis on how to create an ASGI middleware.
+이 문서만으로도 ASGI 미들웨어를 만드는 방법에 대한 좋은 기초를 가질 수 있을 것입니다.
 
-Nonetheless, there are great articles about the subject:
+그럼에도 불구하고 이 주제에 대한 훌륭한 글들이 있습니다:
 
-- [Introduction to ASGI: Emergence of an Async Python Web Ecosystem](https://florimond.dev/en/posts/2019/08/introduction-to-asgi-async-python-web/)
-- [How to write ASGI middleware](https://pgjones.dev/blog/how-to-write-asgi-middleware-2021/)
+- [ASGI 소개: 비동기 Python 웹 생태계의 출현](https://florimond.dev/en/posts/2019/08/introduction-to-asgi-async-python-web/)
+- [ASGI 미들웨어를 작성하는 방법](https://pgjones.dev/blog/how-to-write-asgi-middleware-2021/)
 
-## Using middleware in other frameworks
+## 다른 프레임워크에서 미들웨어 사용하기
 
-To wrap ASGI middleware around other ASGI applications, you should use the
-more general pattern of wrapping the application instance:
+다른 ASGI 애플리케이션에 ASGI 미들웨어를 래핑하려면 애플리케이션 인스턴스를 래핑하는 더 일반적인 패턴을 사용해야 합니다:
 
 ```python
 app = TrustedHostMiddleware(app, allowed_hosts=['example.com'])
 ```
 
-You can do this with a Starlette application instance too, but it is preferable
-to use the `middleware=<List of Middleware instances>` style, as it will:
+Starlette 애플리케이션 인스턴스에서도 이렇게 할 수 있지만, `middleware=<미들웨어 인스턴스 목록>` 스타일을 사용하는 것이 좋습니다. 이렇게 하면:
 
-* Ensure that everything remains wrapped in a single outermost `ServerErrorMiddleware`.
-* Preserves the top-level `app` instance.
+* 모든 것이 단일 최외곽 `ServerErrorMiddleware`로 래핑된 상태로 유지됩니다.
+* 최상위 `app` 인스턴스를 유지합니다.
 
-## Applying middleware to groups of routes
+## 라우트 그룹에 미들웨어 적용하기
 
-Middleware can also be added to `Mount` instances, which allows you to apply middleware to a group of routes or a sub-application:
+미들웨어는 `Mount` 인스턴스에도 추가할 수 있어, 라우트 그룹이나 서브 애플리케이션에 미들웨어를 적용할 수 있습니다:
 
 ```python
 from starlette.applications import Starlette
@@ -733,15 +708,15 @@ routes = [
 app = Starlette(routes=routes)
 ```
 
-Note that middleware used in this way is *not* wrapped in exception handling middleware like the middleware applied to the `Starlette` application is.
-This is often not a problem because it only applies to middleware that inspect or modify the `Response`, and even then you probably don't want to apply this logic to error responses.
-If you do want to apply the middleware logic to error responses only on some routes you have a couple of options:
+이런 방식으로 사용된 미들웨어는 `Starlette` 애플리케이션에 적용된 미들웨어처럼 예외 처리 미들웨어로 감싸지지 않는다는 점에 주의하세요.
+이는 보통 `Response`를 검사하거나 수정하는 미들웨어에만 해당되며, 대부분의 경우 오류 응답에 이 로직을 적용하고 싶지 않을 것입니다.
+만약 일부 라우트에서만 오류 응답에 미들웨어 로직을 적용하고 싶다면 몇 가지 방법이 있습니다:
 
-* Add an `ExceptionMiddleware` onto the `Mount`
-* Add a `try/except` block to your middleware and return an error response from there
-* Split up marking and processing into two middlewares, one that gets put on `Mount` which marks the response as needing processing (for example by setting `scope["log-response"] = True`) and another applied to the `Starlette` application that does the heavy lifting.
+* `Mount`에 `ExceptionMiddleware`를 추가합니다
+* 미들웨어에 `try/except` 블록을 추가하고 거기서 오류 응답을 반환합니다
+* 표시와 처리를 두 개의 미들웨어로 분리합니다. 하나는 `Mount`에 넣어 응답이 처리가 필요하다고 표시하고(예: `scope["log-response"] = True`로 설정), 다른 하나는 `Starlette` 애플리케이션에 적용하여 실제 작업을 수행합니다.
 
-The `Route`/`WebSocket` class also accepts a `middleware` argument, which allows you to apply middleware to a single route:
+`Route`/`WebSocket` 클래스도 `middleware` 인자를 받아 단일 라우트에 미들웨어를 적용할 수 있습니다:
 
 ```python
 from starlette.applications import Starlette
@@ -761,7 +736,7 @@ routes = [
 app = Starlette(routes=routes)
 ```
 
-You can also apply middleware to the `Router` class, which allows you to apply middleware to a group of routes:
+또한 `Router` 클래스에도 미들웨어를 적용할 수 있어, 라우트 그룹에 미들웨어를 적용할 수 있습니다:
 
 ```python
 from starlette.applications import Starlette
@@ -778,71 +753,68 @@ routes = [
 router = Router(routes=routes, middleware=[Middleware(GZipMiddleware)])
 ```
 
-## Third party middleware
+## 서드파티 미들웨어
 
 #### [asgi-auth-github](https://github.com/simonw/asgi-auth-github)
 
-This middleware adds authentication to any ASGI application, requiring users to sign in
-using their GitHub account (via [OAuth](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/)).
-Access can be restricted to specific users or to members of specific GitHub organizations or teams.
+이 미들웨어는 모든 ASGI 애플리케이션에 인증을 추가하여, 사용자가 GitHub 계정으로 로그인하도록 요구합니다([OAuth](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/)를 통해).
+접근은 특정 사용자나 특정 GitHub 조직 또는 팀의 멤버로 제한할 수 있습니다.
 
 #### [asgi-csrf](https://github.com/simonw/asgi-csrf)
 
-Middleware for protecting against CSRF attacks. This middleware implements the Double Submit Cookie pattern, where a cookie is set, then it is compared to a csrftoken hidden form field or an `x-csrftoken` HTTP header.
+CSRF 공격을 방지하기 위한 미들웨어입니다. 이 미들웨어는 Double Submit Cookie 패턴을 구현합니다. 쿠키가 설정되고, 이후 숨겨진 폼 필드의 csrftoken이나 `x-csrftoken` HTTP 헤더와 비교됩니다.
 
 #### [AuthlibMiddleware](https://github.com/aogier/starlette-authlib)
 
-A drop-in replacement for Starlette session middleware, using [authlib's jwt](https://docs.authlib.org/en/latest/jose/jwt.html)
-module.
+Starlette 세션 미들웨어를 대체할 수 있는 미들웨어로, [authlib의 jwt](https://docs.authlib.org/en/latest/jose/jwt.html) 모듈을 사용합니다.
 
 #### [BugsnagMiddleware](https://github.com/ashinabraham/starlette-bugsnag)
 
-A middleware class for logging exceptions to [Bugsnag](https://www.bugsnag.com/).
+예외를 [Bugsnag](https://www.bugsnag.com/)에 로깅하기 위한 미들웨어 클래스입니다.
 
 #### [CSRFMiddleware](https://github.com/frankie567/starlette-csrf)
 
-Middleware for protecting against CSRF attacks. This middleware implements the Double Submit Cookie pattern, where a cookie is set, then it is compared to an `x-csrftoken` HTTP header.
+CSRF 공격을 방지하기 위한 미들웨어입니다. 이 미들웨어는 Double Submit Cookie 패턴을 구현합니다. 쿠키가 설정되고, 이후 `x-csrftoken` HTTP 헤더와 비교됩니다.
 
 #### [EarlyDataMiddleware](https://github.com/HarrySky/starlette-early-data)
 
-Middleware and decorator for detecting and denying [TLSv1.3 early data](https://tools.ietf.org/html/rfc8470) requests.
+[TLSv1.3 early data](https://tools.ietf.org/html/rfc8470) 요청을 감지하고 거부하기 위한 미들웨어와 데코레이터입니다.
 
 #### [PrometheusMiddleware](https://github.com/perdy/starlette-prometheus)
 
-A middleware class for capturing Prometheus metrics related to requests and responses, including in progress requests, timing...
+진행 중인 요청을 포함하여 요청 및 응답과 관련된 Prometheus 메트릭을 캡처하기 위한 미들웨어 클래스입니다.
 
 #### [ProxyHeadersMiddleware](https://github.com/encode/uvicorn/blob/master/uvicorn/middleware/proxy_headers.py)
 
-Uvicorn includes a middleware class for determining the client IP address,
-when proxy servers are being used, based on the `X-Forwarded-Proto` and `X-Forwarded-For` headers. For more complex proxy configurations, you might want to adapt this middleware.
+Uvicorn은 프록시 서버가 사용될 때 `X-Forwarded-Proto`와 `X-Forwarded-For` 헤더를 기반으로 클라이언트 IP 주소를 결정하는 미들웨어 클래스를 포함하고 있습니다. 더 복잡한 프록시 구성의 경우, 이 미들웨어를 수정해야 할 수 있습니다.
 
 #### [RateLimitMiddleware](https://github.com/abersheeran/asgi-ratelimit)
 
-A rate limit middleware. Regular expression matches url; flexible rules; highly customizable. Very easy to use.
+속도 제한 미들웨어입니다. 정규 표현식으로 URL을 매칭하고, 유연한 규칙과 높은 커스터마이징이 가능합니다. 사용하기 매우 쉽습니다.
 
 #### [RequestIdMiddleware](https://github.com/snok/asgi-correlation-id)
 
-A middleware class for reading/generating request IDs and attaching them to application logs.
+요청 ID를 읽고 생성하여 애플리케이션 로그에 첨부하는 미들웨어 클래스입니다.
 
 #### [RollbarMiddleware](https://docs.rollbar.com/docs/starlette)
 
-A middleware class for logging exceptions, errors, and log messages to [Rollbar](https://www.rollbar.com).
+예외, 오류 및 로그 메시지를 [Rollbar](https://www.rollbar.com)에 로깅하기 위한 미들웨어 클래스입니다.
 
 #### [StarletteOpentracing](https://github.com/acidjunk/starlette-opentracing)
 
-A middleware class that emits tracing info to [OpenTracing.io](https://opentracing.io/) compatible tracers and
-can be used to profile and monitor distributed applications.
+[OpenTracing.io](https://opentracing.io/) 호환 트레이서에 트레이싱 정보를 내보내는 미들웨어 클래스로,
+분산 애플리케이션의 프로파일링과 모니터링에 사용할 수 있습니다.
 
 #### [SecureCookiesMiddleware](https://github.com/thearchitector/starlette-securecookies)
 
-Customizable middleware for adding automatic cookie encryption and decryption to Starlette applications, with
-extra support for existing cookie-based middleware.
+Starlette 애플리케이션에 자동 쿠키 암호화 및 복호화를 추가하는 커스터마이즈 가능한 미들웨어로,
+기존 쿠키 기반 미들웨어에 대한 추가 지원도 제공합니다.
 
 #### [TimingMiddleware](https://github.com/steinnes/timing-asgi)
 
-A middleware class to emit timing information (cpu and wall time) for each request which
-passes through it.  Includes examples for how to emit these timings as statsd metrics.
+각 요청에 대한 타이밍 정보(CPU 및 월 시간)를 내보내는 미들웨어 클래스입니다.
+이러한 타이밍을 statsd 메트릭으로 내보내는 방법에 대한 예제도 포함하고 있습니다.
 
 #### [WSGIMiddleware](https://github.com/abersheeran/a2wsgi)
 
-A middleware class in charge of converting a WSGI application into an ASGI one.
+WSGI 애플리케이션을 ASGI 애플리케이션으로 변환하는 미들웨어 클래스입니다.

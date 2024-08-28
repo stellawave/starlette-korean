@@ -1,6 +1,4 @@
-
-The test client allows you to make requests against your ASGI application,
-using the `httpx` library.
+테스트 클라이언트를 사용하면 `httpx` 라이브러리를 사용하여 ASGI 애플리케이션에 대한 요청을 만들 수 있습니다.
 
 ```python
 from starlette.responses import HTMLResponse
@@ -9,7 +7,7 @@ from starlette.testclient import TestClient
 
 async def app(scope, receive, send):
     assert scope['type'] == 'http'
-    response = HTMLResponse('<html><body>Hello, world!</body></html>')
+    response = HTMLResponse('<html><body>안녕하세요, 세계!</body></html>')
     await response(scope, receive, send)
 
 
@@ -19,64 +17,60 @@ def test_app():
     assert response.status_code == 200
 ```
 
-The test client exposes the same interface as any other `httpx` session.
-In particular, note that the calls to make a request are just standard
-function calls, not awaitables.
+테스트 클라이언트는 다른 `httpx` 세션과 동일한 인터페이스를 제공합니다.
+특히 요청을 만들기 위한 호출은 단순한 표준 함수 호출이며, 비동기 함수가 아닙니다.
 
-You can use any of `httpx` standard API, such as authentication, session
-cookies handling, or file uploads.
+인증, 세션 쿠키 처리 또는 파일 업로드와 같은 `httpx`의 표준 API를 사용할 수 있습니다.
 
-For example, to set headers on the TestClient you can do:
+예를 들어, TestClient에서 헤더를 설정하려면 다음과 같이 할 수 있습니다:
 
 ```python
 client = TestClient(app)
 
-# Set headers on the client for future requests
+# 향후 요청을 위해 클라이언트에 헤더 설정
 client.headers = {"Authorization": "..."}
 response = client.get("/")
 
-# Set headers for each request separately
+# 각 요청마다 별도로 헤더 설정
 response = client.get("/", headers={"Authorization": "..."})
 ```
 
-And for example to send files with the TestClient:
+그리고 예를 들어 TestClient로 파일을 보내려면:
 
 ```python
 client = TestClient(app)
 
-# Send a single file
+# 단일 파일 보내기
 with open("example.txt", "rb") as f:
     response = client.post("/form", files={"file": f})
 
-# Send multiple files
+# 여러 파일 보내기
 with open("example.txt", "rb") as f1:
     with open("example.png", "rb") as f2:
         files = {"file1": f1, "file2": ("filename", f2, "image/png")}
         response = client.post("/form", files=files)
 ```
 
-For more information you can check the `httpx` [documentation](https://www.python-httpx.org/advanced/).
+더 자세한 정보는 `httpx` [문서](https://www.python-httpx.org/advanced/)를 확인할 수 있습니다.
 
-By default the `TestClient` will raise any exceptions that occur in the
-application. Occasionally you might want to test the content of 500 error
-responses, rather than allowing client to raise the server exception. In this
-case you should use `client = TestClient(app, raise_server_exceptions=False)`.
+기본적으로 `TestClient`는 애플리케이션에서 발생하는 모든 예외를 발생시킵니다. 때때로 서버 예외를 발생시키는 대신 500 오류 응답의 내용을 테스트하고 싶을 수 있습니다. 이 경우 `client = TestClient(app, raise_server_exceptions=False)`를 사용해야 합니다.
 
-!!! note
+!!! 주의
 
-    If you want the `TestClient` to run the `lifespan` handler,
-    you will need to use the `TestClient` as a context manager. It will
-    not be triggered when the `TestClient` is instantiated. You can learn more about it
-    [here](lifespan.md#running-lifespan-in-tests).
+    `TestClient`가 `lifespan` 핸들러를 실행하도록 하려면,
+    `TestClient`를 컨텍스트 매니저로 사용해야 합니다. `TestClient`가 
+    인스턴스화될 때는 트리거되지 않습니다. 이에 대해 
+    [여기](lifespan.md#running-lifespan-in-tests)에서 더 자세히 알아볼 수 있습니다.
 
-### Selecting the Async backend
+### 비동기 백엔드 선택
 
-`TestClient` takes arguments `backend` (a string) and `backend_options` (a dictionary).
-These options are passed to `anyio.start_blocking_portal()`. See the [anyio documentation](https://anyio.readthedocs.io/en/stable/basics.html#backend-options)
-for more information about the accepted backend options.
-By default, `asyncio` is used with default options.
+`TestClient`는 `backend` (문자열)와 `backend_options` (딕셔너리) 인자를 받습니다.
+이 옵션들은 `anyio.start_blocking_portal()`에 전달됩니다. 허용되는 백엔드 옵션에 대한 
+자세한 정보는 [anyio 문서](https://anyio.readthedocs.io/en/stable/basics.html#backend-options)를 
+참조하세요.
+기본적으로 `asyncio`가 기본 옵션과 함께 사용됩니다.
 
-To run `Trio`, pass `backend="trio"`. For example:
+`Trio`를 실행하려면 `backend="trio"`를 전달하세요. 예를 들어:
 
 ```python
 def test_app()
@@ -84,7 +78,7 @@ def test_app()
        ...
 ```
 
-To run `asyncio` with `uvloop`, pass `backend_options={"use_uvloop": True}`.  For example:
+`uvloop`과 함께 `asyncio`를 실행하려면 `backend_options={"use_uvloop": True}`를 전달하세요. 예를 들어:
 
 ```python
 def test_app()
@@ -92,13 +86,11 @@ def test_app()
        ...
 ```
 
-### Testing WebSocket sessions
+### WebSocket 세션 테스트하기
 
-You can also test websocket sessions with the test client.
+테스트 클라이언트를 사용하여 웹소켓 세션도 테스트할 수 있습니다.
 
-The `httpx` library will be used to build the initial handshake, meaning you
-can use the same authentication options and other headers between both http and
-websocket testing.
+초기 핸드셰이크를 구축하기 위해 `httpx` 라이브러리가 사용되므로, HTTP와 웹소켓 테스트 간에 동일한 인증 옵션과 기타 헤더를 사용할 수 있습니다.
 
 ```python
 from starlette.testclient import TestClient
@@ -120,57 +112,53 @@ def test_app():
         assert data == 'Hello, world!'
 ```
 
-The operations on session are standard function calls, not awaitables.
+세션의 작업들은 표준 함수 호출이며, await 가능한 것이 아닙니다.
 
-It's important to use the session within a context-managed `with` block. This
-ensure that the background thread on which the ASGI application is properly
-terminated, and that any exceptions that occur within the application are
-always raised by the test client.
+세션을 컨텍스트 관리 `with` 블록 내에서 사용하는 것이 중요합니다. 이는 ASGI 애플리케이션이 실행되는 백그라운드 스레드가 적절히 종료되고, 애플리케이션 내에서 발생하는 모든 예외가 항상 테스트 클라이언트에 의해 발생되도록 보장합니다.
 
-#### Establishing a test session
+#### 테스트 세션 설정하기
 
-* `.websocket_connect(url, subprotocols=None, **options)` - Takes the same set of arguments as `httpx.get()`.
+* `.websocket_connect(url, subprotocols=None, **options)` - `httpx.get()`와 동일한 인자 집합을 받습니다.
 
-May raise `starlette.websockets.WebSocketDisconnect` if the application does not accept the websocket connection.
+애플리케이션이 웹소켓 연결을 수락하지 않으면 `starlette.websockets.WebSocketDisconnect`를 발생시킬 수 있습니다.
 
-`websocket_connect()` must be used as a context manager (in a `with` block).
+`websocket_connect()`는 반드시 컨텍스트 관리자(`with` 블록)로 사용되어야 합니다.
 
 !!! note
-    The `params` argument is not supported by `websocket_connect`. If you need to pass query arguments, hard code it
-    directly in the URL.
+    `params` 인자는 `websocket_connect`에서 지원되지 않습니다. 쿼리 인자를 전달해야 하는 경우, URL에 직접 하드코딩하세요.
 
     ```python
     with client.websocket_connect('/path?foo=bar') as websocket:
         ...
     ```
 
-#### Sending data
+#### 데이터 보내기
 
-* `.send_text(data)` - Send the given text to the application.
-* `.send_bytes(data)` - Send the given bytes to the application.
-* `.send_json(data, mode="text")` - Send the given data to the application. Use `mode="binary"` to send JSON over binary data frames.
+* `.send_text(data)` - 주어진 텍스트를 애플리케이션에 보냅니다.
+* `.send_bytes(data)` - 주어진 바이트를 애플리케이션에 보냅니다.
+* `.send_json(data, mode="text")` - 주어진 데이터를 애플리케이션에 보냅니다. 바이너리 데이터 프레임을 통해 JSON을 보내려면 `mode="binary"`를 사용하세요.
 
-#### Receiving data
+#### 데이터 받기
 
-* `.receive_text()` - Wait for incoming text sent by the application and return it.
-* `.receive_bytes()` - Wait for incoming bytestring sent by the application and return it.
-* `.receive_json(mode="text")` - Wait for incoming json data sent by the application and return it. Use `mode="binary"` to receive JSON over binary data frames.
+* `.receive_text()` - 애플리케이션이 보낸 들어오는 텍스트를 기다리고 반환합니다.
+* `.receive_bytes()` - 애플리케이션이 보낸 들어오는 바이트 문자열을 기다리고 반환합니다.
+* `.receive_json(mode="text")` - 애플리케이션이 보낸 들어오는 json 데이터를 기다리고 반환합니다. 바이너리 데이터 프레임을 통해 JSON을 받으려면 `mode="binary"`를 사용하세요.
 
-May raise `starlette.websockets.WebSocketDisconnect`.
+`starlette.websockets.WebSocketDisconnect`를 발생시킬 수 있습니다.
 
-#### Closing the connection
+#### 연결 닫기
 
-* `.close(code=1000)` - Perform a client-side close of the websocket connection.
+* `.close(code=1000)` - 웹소켓 연결의 클라이언트 측 종료를 수행합니다.
 
-### Asynchronous tests
+### 비동기 테스트
 
-Sometimes you will want to do async things outside of your application.
-For example, you might want to check the state of your database after calling your app using your existing async database client / infrastructure.
+때로는 애플리케이션 외부에서 비동기 작업을 수행해야 할 수 있습니다.
+예를 들어, 기존의 비동기 데이터베이스 클라이언트/인프라를 사용하여 앱을 호출한 후 데이터베이스 상태를 확인하고 싶을 수 있습니다.
 
-For these situations, using `TestClient` is difficult because it creates it's own event loop and async resources (like a database connection) often cannot be shared across event loops.
-The simplest way to work around this is to just make your entire test async and use an async client, like [httpx.AsyncClient].
+이러한 상황에서는 `TestClient`를 사용하기 어렵습니다. 왜냐하면 `TestClient`는 자체 이벤트 루프를 생성하고, 데이터베이스 연결과 같은 비동기 리소스는 종종 이벤트 루프 간에 공유될 수 없기 때문입니다.
+이를 해결하는 가장 간단한 방법은 전체 테스트를 비동기로 만들고 [httpx.AsyncClient]와 같은 비동기 클라이언트를 사용하는 것입니다.
 
-Here is an example of such a test:
+다음은 그러한 테스트의 예시입니다:
 
 ```python
 from httpx import AsyncClient
@@ -187,11 +175,11 @@ def hello(request: Request) -> PlainTextResponse:
 app = Starlette(routes=[Route("/", hello)])
 
 
-# if you're using pytest, you'll need to to add an async marker like:
-# @pytest.mark.anyio  # using https://github.com/agronholm/anyio
-# or install and configure pytest-asyncio (https://github.com/pytest-dev/pytest-asyncio)
+# pytest를 사용하는 경우, 다음과 같은 비동기 마커를 추가해야 합니다:
+# @pytest.mark.anyio  # https://github.com/agronholm/anyio 사용
+# 또는 pytest-asyncio를 설치하고 구성하세요 (https://github.com/pytest-dev/pytest-asyncio)
 async def test_app() -> None:
-    # note: you _must_ set `base_url` for relative urls like "/" to work
+    # 주의: "/" 같은 상대 URL이 작동하려면 반드시 `base_url`을 설정해야 합니다
     async with AsyncClient(app=app, base_url="http://testserver") as client:
         r = await client.get("/")
         assert r.status_code == 200

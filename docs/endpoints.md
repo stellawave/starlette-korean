@@ -1,10 +1,8 @@
-
-Starlette includes the classes `HTTPEndpoint` and `WebSocketEndpoint` that provide a class-based view pattern for
-handling HTTP method dispatching and WebSocket sessions.
+Starlette는 HTTP 메서드 디스패칭과 WebSocket 세션을 처리하기 위한 클래스 기반 뷰 패턴을 제공하는 `HTTPEndpoint`와 `WebSocketEndpoint` 클래스를 포함합니다.
 
 ### HTTPEndpoint
 
-The `HTTPEndpoint` class can be used as an ASGI application:
+`HTTPEndpoint` 클래스는 ASGI 애플리케이션으로 사용될 수 있습니다:
 
 ```python
 from starlette.responses import PlainTextResponse
@@ -13,12 +11,10 @@ from starlette.endpoints import HTTPEndpoint
 
 class App(HTTPEndpoint):
     async def get(self, request):
-        return PlainTextResponse(f"Hello, world!")
+        return PlainTextResponse(f"안녕하세요, 세상!")
 ```
 
-If you're using a Starlette application instance to handle routing, you can
-dispatch to an `HTTPEndpoint` class. Make sure to dispatch to the class itself,
-rather than to an instance of the class:
+Starlette 애플리케이션 인스턴스를 사용하여 라우팅을 처리하는 경우, `HTTPEndpoint` 클래스로 디스패치할 수 있습니다. 클래스의 인스턴스가 아닌 클래스 자체로 디스패치해야 합니다:
 
 ```python
 from starlette.applications import Starlette
@@ -29,13 +25,13 @@ from starlette.routing import Route
 
 class Homepage(HTTPEndpoint):
     async def get(self, request):
-        return PlainTextResponse(f"Hello, world!")
+        return PlainTextResponse(f"안녕하세요, 세상!")
 
 
 class User(HTTPEndpoint):
     async def get(self, request):
         username = request.path_params['username']
-        return PlainTextResponse(f"Hello, {username}")
+        return PlainTextResponse(f"안녕하세요, {username}")
 
 routes = [
     Route("/", Homepage),
@@ -45,24 +41,21 @@ routes = [
 app = Starlette(routes=routes)
 ```
 
-HTTP endpoint classes will respond with "405 Method not allowed" responses for any
-request methods which do not map to a corresponding handler.
+HTTP 엔드포인트 클래스는 해당 핸들러에 매핑되지 않는 요청 메서드에 대해 "405 Method not allowed" 응답을 반환합니다.
 
 ### WebSocketEndpoint
 
-The `WebSocketEndpoint` class is an ASGI application that presents a wrapper around
-the functionality of a `WebSocket` instance.
+`WebSocketEndpoint` 클래스는 `WebSocket` 인스턴스의 기능을 감싸는 ASGI 애플리케이션입니다.
 
-The ASGI connection scope is accessible on the endpoint instance via `.scope` and
-has an attribute `encoding` which may optionally be set, in order to validate the expected websocket data in the `on_receive` method.
+ASGI 연결 스코프는 엔드포인트 인스턴스의 `.scope`를 통해 접근할 수 있으며, `on_receive` 메서드에서 예상되는 웹소켓 데이터를 검증하기 위해 선택적으로 설정할 수 있는 `encoding` 속성을 가지고 있습니다.
 
-The encoding types are:
+인코딩 유형은 다음과 같습니다:
 
 * `'json'`
 * `'bytes'`
 * `'text'`
 
-There are three overridable methods for handling specific ASGI websocket message types:
+특정 ASGI 웹소켓 메시지 유형을 처리하기 위해 재정의할 수 있는 세 가지 메서드가 있습니다:
 
 * `async def on_connect(websocket, **kwargs)`
 * `async def on_receive(websocket, data)`
@@ -85,7 +78,7 @@ class App(WebSocketEndpoint):
         pass
 ```
 
-The `WebSocketEndpoint` can also be used with the `Starlette` application class:
+`WebSocketEndpoint`는 `Starlette` 애플리케이션 클래스와 함께 사용할 수도 있습니다:
 
 ```python
 import uvicorn

@@ -1,8 +1,6 @@
-Starlette encourages a strict separation of configuration from code,
-following [the twelve-factor pattern][twelve-factor].
+Starlette는 [12팩터 패턴][twelve-factor]을 따라 구성과 코드를 엄격히 분리하도록 권장합니다.
 
-Configuration should be stored in environment variables, or in a `.env` file
-that is not committed to source control.
+구성은 환경 변수에 저장하거나 소스 제어에 커밋되지 않는 `.env` 파일에 저장해야 합니다.
 
 ```python title="main.py"
 from sqlalchemy import create_engine
@@ -10,7 +8,7 @@ from starlette.applications import Starlette
 from starlette.config import Config
 from starlette.datastructures import CommaSeparatedStrings, Secret
 
-# Config will be read from environment variables and/or ".env" files.
+# 구성은 환경 변수 및/또는 ".env" 파일에서 읽힙니다.
 config = Config(".env")
 
 DEBUG = config('DEBUG', cast=bool, default=False)
@@ -24,32 +22,29 @@ engine = create_engine(DATABASE_URL)
 ```
 
 ```shell title=".env"
-# Don't commit this to source control.
-# Eg. Include ".env" in your `.gitignore` file.
+# 이 파일을 소스 제어에 커밋하지 마세요.
+# 예: `.gitignore` 파일에 ".env"를 포함시키세요.
 DEBUG=True
 DATABASE_URL=postgresql://user:password@localhost:5432/database
 SECRET_KEY=43n080musdfjt54t-09sdgr
 ALLOWED_HOSTS=127.0.0.1, localhost
 ```
 
-## Configuration precedence
+## 구성 우선순위
 
-The order in which configuration values are read is:
+구성 값이 읽히는 순서는 다음과 같습니다:
 
-* From an environment variable.
-* From the `.env` file.
-* The default value given in `config`.
+* 환경 변수에서.
+* `.env` 파일에서.
+* `config`에 주어진 기본값.
 
-If none of those match, then `config(...)` will raise an error.
+위의 어느 것도 일치하지 않으면 `config(...)`는 오류를 발생시킵니다.
 
-## Secrets
+## 비밀
 
-For sensitive keys, the `Secret` class is useful, since it helps minimize
-occasions where the value it holds could leak out into tracebacks or
-other code introspection.
+민감한 키의 경우, `Secret` 클래스가 유용합니다. 이는 해당 값이 트레이스백이나 다른 코드 내부 검사에 노출될 수 있는 경우를 최소화하는 데 도움이 됩니다.
 
-To get the value of a `Secret` instance, you must explicitly cast it to a string.
-You should only do this at the point at which the value is used.
+`Secret` 인스턴스의 값을 얻으려면 명시적으로 문자열로 캐스팅해야 합니다. 이는 값이 사용되는 시점에서만 수행해야 합니다.
 
 ```python
 >>> from myproject import settings
@@ -61,14 +56,11 @@ Secret('**********')
 
 !!! tip
 
-    You can use `DatabaseURL` from `databases`
-    package [here](https://github.com/encode/databases/blob/ab5eb718a78a27afe18775754e9c0fa2ad9cd211/databases/core.py#L420)
-    to store database URLs and avoid leaking them in the logs.
+    데이터베이스 URL을 저장하고 로그에 노출되는 것을 방지하기 위해 `databases` 패키지의 `DatabaseURL`을 [여기](https://github.com/encode/databases/blob/ab5eb718a78a27afe18775754e9c0fa2ad9cd211/databases/core.py#L420)에서 사용할 수 있습니다.
 
 ## CommaSeparatedStrings
 
-For holding multiple inside a single config key, the `CommaSeparatedStrings`
-type is useful.
+단일 구성 키 내에 여러 값을 저장하기 위해 `CommaSeparatedStrings` 타입이 유용합니다.
 
 ```python
 >>> from myproject import settings
@@ -82,19 +74,13 @@ CommaSeparatedStrings(['127.0.0.1', 'localhost'])
 '127.0.0.1'
 ```
 
-## Reading or modifying the environment
+## 환경 읽기 또는 수정하기
 
-In some cases you might want to read or modify the environment variables programmatically.
-This is particularly useful in testing, where you may want to override particular
-keys in the environment.
+경우에 따라 프로그래밍 방식으로 환경 변수를 읽거나 수정하고 싶을 수 있습니다. 이는 특히 테스트에서 유용하며, 환경의 특정 키를 재정의하고 싶을 수 있습니다.
 
-Rather than reading or writing from `os.environ`, you should use Starlette's
-`environ` instance. This instance is a mapping onto the standard `os.environ`
-that additionally protects you by raising an error if any environment variable
-is set *after* the point that it has already been read by the configuration.
+`os.environ`에서 직접 읽거나 쓰는 대신, Starlette의 `environ` 인스턴스를 사용해야 합니다. 이 인스턴스는 표준 `os.environ`에 대한 매핑이며, 추가로 구성에 의해 이미 읽힌 후에 환경 변수가 설정되는 경우 오류를 발생시켜 보호합니다.
 
-If you're using `pytest`, then you can setup any initial environment in
-`tests/conftest.py`.
+`pytest`를 사용하는 경우, `tests/conftest.py`에서 초기 환경을 설정할 수 있습니다.
 
 ```python title="tests/conftest.py"
 from starlette.config import environ
@@ -102,9 +88,9 @@ from starlette.config import environ
 environ['DEBUG'] = 'TRUE'
 ```
 
-## Reading prefixed environment variables
+## 접두사가 붙은 환경 변수 읽기
 
-You can namespace the environment variables by setting `env_prefix` argument.
+`env_prefix` 인자를 설정하여 환경 변수에 네임스페이스를 지정할 수 있습니다.
 
 ```python title="myproject/settings.py"
 import os
@@ -116,21 +102,17 @@ os.environ['ENVIRONMENT'] = 'dev'
 
 config = Config(env_prefix='APP_')
 
-DEBUG = config('DEBUG') # lookups APP_DEBUG, returns "yes"
-ENVIRONMENT = config('ENVIRONMENT') # lookups APP_ENVIRONMENT, raises KeyError as variable is not defined
+DEBUG = config('DEBUG') # APP_DEBUG를 조회하고, "yes"를 반환합니다
+ENVIRONMENT = config('ENVIRONMENT') # APP_ENVIRONMENT를 조회하지만, 변수가 정의되지 않아 KeyError를 발생시킵니다
 ```
 
-## A full example
+## 전체 예제
 
-Structuring large applications can be complex. You need proper separation of
-configuration and code, database isolation during tests, separate test and
-production databases, etc...
+대규모 애플리케이션을 구조화하는 것은 복잡할 수 있습니다. 설정과 코드의 적절한 분리, 테스트 중 데이터베이스 격리, 테스트와 프로덕션 데이터베이스 분리 등이 필요합니다.
 
-Here we'll take a look at a complete example, that demonstrates how
-we can start to structure an application.
+여기서는 애플리케이션 구조화를 시작할 수 있는 방법을 보여주는 완전한 예제를 살펴보겠습니다.
 
-First, let's keep our settings, our database table definitions, and our
-application logic separated:
+먼저, 설정, 데이터베이스 테이블 정의, 애플리케이션 로직을 분리해 보겠습니다:
 
 ```python title="myproject/settings.py"
 from starlette.config import Config
@@ -147,7 +129,7 @@ DATABASE_URL = config('DATABASE_URL')
 ```python title="myproject/tables.py"
 import sqlalchemy
 
-# Database table definitions.
+# 데이터베이스 테이블 정의
 metadata = sqlalchemy.MetaData()
 
 organisations = sqlalchemy.Table(
@@ -181,9 +163,8 @@ middleware = [
 app = Starlette(debug=settings.DEBUG, routes=routes, middleware=middleware)
 ```
 
-Now let's deal with our test configuration.
-We'd like to create a new test database every time the test suite runs,
-and drop it once the tests complete. We'd also like to ensure
+이제 테스트 구성을 다뤄보겠습니다.
+테스트 스위트가 실행될 때마다 새로운 테스트 데이터베이스를 생성하고, 테스트가 완료되면 삭제하고 싶습니다. 또한 다음을 확인하고 싶습니다.
 
 ```python title="tests/conftest.py"
 from starlette.config import environ
@@ -191,7 +172,7 @@ from starlette.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
-# This line would raise an error if we use it after 'settings' has been imported.
+# 이 줄은 'settings'가 import된 후에 사용하면 오류가 발생합니다.
 environ['DEBUG'] = 'TRUE'
 
 from myproject import settings
@@ -202,24 +183,24 @@ from myproject.tables import metadata
 @pytest.fixture(autouse=True, scope="session")
 def setup_test_database():
     """
-    Create a clean test database every time the tests are run.
+    테스트가 실행될 때마다 깨끗한 테스트 데이터베이스를 생성합니다.
     """
     url = settings.DATABASE_URL
     engine = create_engine(url)
-    assert not database_exists(url), 'Test database already exists. Aborting tests.'
-    create_database(url)             # Create the test database.
-    metadata.create_all(engine)      # Create the tables.
-    yield                            # Run the tests.
-    drop_database(url)               # Drop the test database.
+    assert not database_exists(url), '테스트 데이터베이스가 이미 존재합니다. 테스트를 중단합니다.'
+    create_database(url)             # 테스트 데이터베이스를 생성합니다.
+    metadata.create_all(engine)      # 테이블을 생성합니다.
+    yield                            # 테스트를 실행합니다.
+    drop_database(url)               # 테스트 데이터베이스를 삭제합니다.
 
 
 @pytest.fixture()
 def client():
     """
-    Make a 'client' fixture available to test cases.
+    테스트 케이스에서 사용할 수 있는 'client' 픽스처를 만듭니다.
     """
-    # Our fixture is created within a context manager. This ensures that
-    # application lifespan runs for every test case.
+    # 우리의 픽스처는 컨텍스트 매니저 내에서 생성됩니다. 이는 모든 테스트 케이스에 대해
+    # 애플리케이션 수명 주기가 실행되도록 보장합니다.
     with TestClient(app) as test_client:
         yield test_client
 ```

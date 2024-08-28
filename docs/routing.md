@@ -1,7 +1,6 @@
 ## HTTP Routing
 
-Starlette has a simple but capable request routing system. A routing table
-is defined as a list of routes, and passed when instantiating the application.
+Starlette는 간단하지만 강력한 요청 라우팅 시스템을 가지고 있습니다. 라우팅 테이블은 라우트 목록으로 정의되며, 애플리케이션을 인스턴스화할 때 전달됩니다.
 
 ```python
 from starlette.applications import Starlette
@@ -10,10 +9,10 @@ from starlette.routing import Route
 
 
 async def homepage(request):
-    return PlainTextResponse("Homepage")
+    return PlainTextResponse("홈페이지")
 
 async def about(request):
-    return PlainTextResponse("About")
+    return PlainTextResponse("소개")
 
 
 routes = [
@@ -24,30 +23,29 @@ routes = [
 app = Starlette(routes=routes)
 ```
 
-The `endpoint` argument can be one of:
+`endpoint` 인자는 다음 중 하나일 수 있습니다:
 
-* A regular function or async function, which accepts a single `request`
-argument and which should return a response.
-* A class that implements the ASGI interface, such as Starlette's [HTTPEndpoint](endpoints.md#httpendpoint).
+* 단일 `request` 인자를 받고 응답을 반환해야 하는 일반 함수 또는 비동기 함수.
+* Starlette의 [HTTPEndpoint](endpoints.md#httpendpoint)와 같이 ASGI 인터페이스를 구현하는 클래스.
 
-## Path Parameters
+## 경로 매개변수
 
-Paths can use URI templating style to capture path components.
+경로는 URI 템플릿 스타일을 사용하여 경로 구성 요소를 캡처할 수 있습니다.
 
 ```python
 Route('/users/{username}', user)
 ```
-By default this will capture characters up to the end of the path or the next `/`.
+기본적으로 이는 경로 끝 또는 다음 `/`까지의 문자를 캡처합니다.
 
-You can use convertors to modify what is captured. The available convertors are:
+컨버터를 사용하여 캡처되는 내용을 수정할 수 있습니다. 사용 가능한 컨버터는 다음과 같습니다:
 
-* `str` returns a string, and is the default.
-* `int` returns a Python integer.
-* `float` returns a Python float.
-* `uuid` return a Python `uuid.UUID` instance.
-* `path` returns the rest of the path, including any additional `/` characters.
+* `str`은 문자열을 반환하며, 기본값입니다.
+* `int`는 Python 정수를 반환합니다.
+* `float`는 Python 부동 소수점 숫자를 반환합니다.
+* `uuid`는 Python `uuid.UUID` 인스턴스를 반환합니다.
+* `path`는 추가적인 `/` 문자를 포함한 나머지 경로를 반환합니다.
 
-Convertors are used by prefixing them with a colon, like so:
+컨버터는 다음과 같이 콜론을 앞에 붙여 사용합니다:
 
 ```python
 Route('/users/{user_id:int}', user)
@@ -55,8 +53,8 @@ Route('/floating-point/{number:float}', floating_point)
 Route('/uploaded/{rest_of_path:path}', uploaded)
 ```
 
-If you need a different converter that is not defined, you can create your own.
-See below an example on how to create a `datetime` convertor, and how to register it:
+정의되지 않은 다른 컨버터가 필요한 경우 직접 만들 수 있습니다.
+아래는 `datetime` 컨버터를 만들고 등록하는 방법의 예시입니다:
 
 ```python
 from datetime import datetime
@@ -76,14 +74,13 @@ class DateTimeConvertor(Convertor):
 register_url_convertor("datetime", DateTimeConvertor())
 ```
 
-After registering it, you'll be able to use it as:
+등록 후에는 다음과 같이 사용할 수 있습니다:
 
 ```python
 Route('/history/{date:datetime}', history)
 ```
 
-Path parameters are made available in the request, as the `request.path_params`
-dictionary.
+경로 매개변수는 `request.path_params` 사전에서 사용할 수 있습니다.
 
 ```python
 async def user(request):
@@ -91,20 +88,19 @@ async def user(request):
     ...
 ```
 
-## Handling HTTP methods
+## HTTP 메서드 처리
 
-Routes can also specify which HTTP methods are handled by an endpoint:
+라우트는 엔드포인트가 처리하는 HTTP 메서드도 지정할 수 있습니다:
 
 ```python
 Route('/users/{user_id:int}', user, methods=["GET", "POST"])
 ```
 
-By default function endpoints will only accept `GET` requests, unless specified.
+기본적으로 함수 엔드포인트는 지정하지 않는 한 `GET` 요청만 허용합니다.
 
-## Submounting routes
+## 경로 서브마운팅
 
-In large applications you might find that you want to break out parts of the
-routing table, based on a common path prefix.
+대규모 애플리케이션에서는 공통 경로 접두사를 기반으로 라우팅 테이블의 일부를 분리하고 싶을 수 있습니다.
 
 ```python
 routes = [
@@ -116,8 +112,7 @@ routes = [
 ]
 ```
 
-This style allows you to define different subsets of the routing table in
-different parts of your project.
+이 스타일을 사용하면 프로젝트의 다른 부분에서 라우팅 테이블의 다른 하위 집합을 정의할 수 있습니다.
 
 ```python
 from myproject import users, auth
@@ -129,15 +124,14 @@ routes = [
 ]
 ```
 
-You can also use mounting to include sub-applications within your Starlette
-application. For example...
+마운팅을 사용하여 Starlette 애플리케이션 내에 하위 애플리케이션을 포함할 수도 있습니다. 예를 들어...
 
 ```python
-# This is a standalone static files server:
+# 이것은 독립형 정적 파일 서버입니다:
 app = StaticFiles(directory="static")
 
-# This is a static files server mounted within a Starlette application,
-# underneath the "/static" path.
+# 이것은 Starlette 애플리케이션 내에서 "/static" 경로 아래에 마운트된 
+# 정적 파일 서버입니다.
 routes = [
     ...
     Mount("/static", app=StaticFiles(directory="static"), name="static")
@@ -146,35 +140,33 @@ routes = [
 app = Starlette(routes=routes)
 ```
 
-## Reverse URL lookups
+## URL 역방향 조회
 
-You'll often want to be able to generate the URL for a particular route,
-such as in cases where you need to return a redirect response.
+특히 리다이렉트 응답을 반환해야 하는 경우와 같이 특정 경로의 URL을 생성해야 할 때가 자주 있습니다.
 
-* Signature: `url_for(name, **path_params) -> URL`
+* 시그니처: `url_for(name, **path_params) -> URL`
 
 ```python
 routes = [
     Route("/", homepage, name="homepage")
 ]
 
-# We can use the following to return a URL...
+# 다음을 사용하여 URL을 반환할 수 있습니다...
 url = request.url_for("homepage")
 ```
 
-URL lookups can include path parameters...
+URL 조회에는 경로 매개변수가 포함될 수 있습니다...
 
 ```python
 routes = [
     Route("/users/{username}", user, name="user_detail")
 ]
 
-# We can use the following to return a URL...
+# 다음을 사용하여 URL을 반환할 수 있습니다...
 url = request.url_for("user_detail", username=...)
 ```
 
-If a `Mount` includes a `name`, then submounts should use a `{prefix}:{name}`
-style for reverse URL lookups.
+`Mount`에 `name`이 포함된 경우, 하위 마운트는 역방향 URL 조회를 위해 `{prefix}:{name}` 스타일을 사용해야 합니다.
 
 ```python
 routes = [
@@ -184,12 +176,12 @@ routes = [
     ])
 ]
 
-# We can use the following to return URLs...
+# 다음을 사용하여 URL을 반환할 수 있습니다...
 url = request.url_for("users:user_list")
 url = request.url_for("users:user_detail", username=...)
 ```
 
-Mounted applications may include a `path=...` parameter.
+마운트된 애플리케이션에는 `path=...` 매개변수가 포함될 수 있습니다.
 
 ```python
 routes = [
@@ -197,33 +189,32 @@ routes = [
     Mount("/static", app=StaticFiles(directory="static"), name="static")
 ]
 
-# We can use the following to return URLs...
+# 다음을 사용하여 URL을 반환할 수 있습니다...
 url = request.url_for("static", path="/css/base.css")
 ```
 
-For cases where there is no `request` instance, you can make reverse lookups
-against the application, although these will only return the URL path.
+`request` 인스턴스가 없는 경우, 애플리케이션에 대해 역방향 조회를 수행할 수 있지만 이는 URL 경로만 반환합니다.
 
 ```python
 url = app.url_path_for("user_detail", username=...)
 ```
 
-## Host-based routing
+## 호스트 기반 라우팅
 
-If you want to use different routes for the same path based on the `Host` header.
+`Host` 헤더를 기반으로 동일한 경로에 대해 다른 라우트를 사용하려는 경우입니다.
 
-Note that port is removed from the `Host` header when matching.
-For example, `Host (host='example.org:3600', ...)` will be processed
-even if the `Host` header contains or does not contain a port other than `3600`
-(`example.org:5600`, `example.org`).
-Therefore, you can specify the port if you need it for use in `url_for`.
+매칭 시 `Host` 헤더에서 포트가 제거된다는 점에 유의하세요.
+예를 들어, `Host (host='example.org:3600', ...)`는 
+`Host` 헤더에 `3600` 이외의 포트가 포함되어 있거나 포트가 없는 경우에도
+(`example.org:5600`, `example.org`) 처리됩니다.
+따라서 `url_for`에서 사용하기 위해 필요한 경우 포트를 지정할 수 있습니다.
 
-There are several ways to connect host-based routes to your application
+호스트 기반 라우트를 애플리케이션에 연결하는 여러 가지 방법이 있습니다.
 
 ```python
-site = Router()  # Use eg. `@site.route()` to configure this.
-api = Router()  # Use eg. `@api.route()` to configure this.
-news = Router()  # Use eg. `@news.route()` to configure this.
+site = Router()  # 예: `@site.route()`를 사용하여 구성합니다.
+api = Router()   # 예: `@api.route()`를 사용하여 구성합니다.
+news = Router()  # 예: `@news.route()`를 사용하여 구성합니다.
 
 routes = [
     Host('api.example.org', api, name="site_api")
@@ -237,7 +228,7 @@ news_host = Host('news.example.org', news)
 app.router.routes.append(news_host)
 ```
 
-URL lookups can include host parameters just like path parameters
+URL 조회는 경로 매개변수와 마찬가지로 호스트 매개변수를 포함할 수 있습니다.
 
 ```python
 routes = [
@@ -253,35 +244,35 @@ url = request.url_for("sub:users:user_detail", username=..., subdomain=...)
 url = request.url_for("sub:users:user_list", subdomain=...)
 ```
 
-## Route priority
+## 라우트 우선순위
 
-Incoming paths are matched against each `Route` in order.
+들어오는 경로는 각 `Route`에 대해 순서대로 매칭됩니다.
 
-In cases where more that one route could match an incoming path, you should
-take care to ensure that more specific routes are listed before general cases.
+하나 이상의 라우트가 들어오는 경로와 일치할 수 있는 경우, 
+더 구체적인 라우트가 일반적인 경우보다 먼저 나열되도록 주의해야 합니다.
 
-For example:
+예를 들어:
 
 ```python
-# Don't do this: `/users/me` will never match incoming requests.
+# 이렇게 하지 마세요: `/users/me`는 절대 들어오는 요청과 일치하지 않습니다.
 routes = [
     Route('/users/{username}', user),
     Route('/users/me', current_user),
 ]
 
-# Do this: `/users/me` is tested first.
+# 이렇게 하세요: `/users/me`가 먼저 테스트됩니다.
 routes = [
     Route('/users/me', current_user),
     Route('/users/{username}', user),
 ]
 ```
 
-## Working with Router instances
+## Router 인스턴스 작업
 
-If you're working at a low-level you might want to use a plain `Router`
-instance, rather that creating a `Starlette` application. This gives you
-a lightweight ASGI application that just provides the application routing,
-without wrapping it up in any middleware.
+저수준에서 작업하는 경우 `Starlette` 애플리케이션을 생성하는 대신 
+일반 `Router` 인스턴스를 사용하고 싶을 수 있습니다. 
+이렇게 하면 미들웨어로 래핑하지 않고 애플리케이션 라우팅만 제공하는 
+경량 ASGI 애플리케이션을 얻을 수 있습니다.
 
 ```python
 app = Router(routes=[
@@ -293,13 +284,13 @@ app = Router(routes=[
 ])
 ```
 
-## WebSocket Routing
+## WebSocket 라우팅
 
-When working with WebSocket endpoints, you should use `WebSocketRoute`
-instead of the usual `Route`.
+WebSocket 엔드포인트로 작업할 때는 일반적인 `Route` 대신 `WebSocketRoute`를 
+사용해야 합니다.
 
-Path parameters, and reverse URL lookups for `WebSocketRoute` work the the same
-as HTTP `Route`, which can be found in the HTTP [Route](#http-routing) section above.
+`WebSocketRoute`의 경로 매개변수와 역방향 URL 조회는 
+위의 HTTP [Route](#http-routing) 섹션에서 찾을 수 있는 HTTP `Route`와 동일하게 작동합니다.
 
 ```python
 from starlette.applications import Starlette
@@ -327,7 +318,7 @@ routes = [
 app = Starlette(routes=routes)
 ```
 
-The `endpoint` argument can be one of:
+`endpoint` 인수는 다음 중 하나일 수 있습니다:
 
-* An async function, which accepts a single `websocket` argument.
-* A class that implements the ASGI interface, such as Starlette's [WebSocketEndpoint](endpoints.md#websocketendpoint).
+* 단일 `websocket` 인수를 받는 비동기 함수.
+* Starlette의 [WebSocketEndpoint](endpoints.md#websocketendpoint)와 같이 ASGI 인터페이스를 구현하는 클래스.
