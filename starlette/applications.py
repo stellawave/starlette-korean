@@ -26,32 +26,19 @@ P = ParamSpec("P")
 
 class Starlette:
     """
-    Creates an application instance.
+    애플리케이션 인스턴스를 생성합니다.
 
-    **Parameters:**
+    **매개변수:**
 
-    * **debug** - Boolean indicating if debug tracebacks should be returned on errors.
-    * **routes** - A list of routes to serve incoming HTTP and WebSocket requests.
-    * **middleware** - A list of middleware to run for every request. A starlette
-    application will always automatically include two middleware classes.
-    `ServerErrorMiddleware` is added as the very outermost middleware, to handle
-    any uncaught errors occurring anywhere in the entire stack.
-    `ExceptionMiddleware` is added as the very innermost middleware, to deal
-    with handled exception cases occurring in the routing or endpoints.
-    * **exception_handlers** - A mapping of either integer status codes,
-    or exception class types onto callables which handle the exceptions.
-    Exception handler callables should be of the form
-    `handler(request, exc) -> response` and may be either standard functions, or
-    async functions.
-    * **on_startup** - A list of callables to run on application startup.
-    Startup handler callables do not take any arguments, and may be either
-    standard functions, or async functions.
-    * **on_shutdown** - A list of callables to run on application shutdown.
-    Shutdown handler callables do not take any arguments, and may be either
-    standard functions, or async functions.
-    * **lifespan** - A lifespan context function, which can be used to perform
-    startup and shutdown tasks. This is a newer style that replaces the
-    `on_startup` and `on_shutdown` handlers. Use one or the other, not both.
+    * **debug** - 오류 발생 시 디버그 트레이스백을 반환할지 여부를 나타내는 부울 값.
+    * **routes** - 들어오는 HTTP 및 WebSocket 요청을 처리할 라우트 목록.
+    * **middleware** - 모든 요청에 대해 실행될 미들웨어 목록. Starlette 애플리케이션은 항상 자동으로 두 개의 미들웨어 클래스를 포함합니다.
+      `ServerErrorMiddleware`는 전체 스택의 가장 바깥쪽에서 추가되어 어디서든 발생할 수 있는 잡히지 않은 오류를 처리합니다.
+      `ExceptionMiddleware`는 라우팅 또는 엔드포인트에서 발생하는 처리된 예외 케이스를 처리하기 위해 가장 안쪽에서 추가됩니다.
+    * **exception_handlers** - 정수 상태 코드 또는 예외 클래스 유형을 호출 가능한 예외 처리기와 매핑한 것. 예외 처리기는 `handler(request, exc) -> response` 형식이어야 하며, 일반 함수 또는 비동기 함수일 수 있습니다.
+    * **on_startup** - 애플리케이션 시작 시 실행할 호출 가능한 항목 목록. 시작 핸들러는 인수를 받지 않으며, 일반 함수 또는 비동기 함수일 수 있습니다.
+    * **on_shutdown** - 애플리케이션 종료 시 실행할 호출 가능한 항목 목록. 종료 핸들러는 인수를 받지 않으며, 일반 함수 또는 비동기 함수일 수 있습니다.
+    * **lifespan** - 시작 및 종료 작업을 수행할 수 있는 lifespan 컨텍스트 함수. 이는 `on_startup` 및 `on_shutdown` 핸들러를 대체하는 새로운 스타일로, 둘 중 하나만 사용해야 합니다.
     """
 
     def __init__(
